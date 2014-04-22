@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Selector de imatges</title>
+  
+  <style>
+        canvas {
+            border:1px solid red;
+        }
+  </style>
+</head>
+
+<body >
+    <canvas id="canvas" style="display: inline-block;"></canvas>
+</body>
+</html>
+<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript">
+
+    var canvas;
+    var ctx;
+
+    var canvasOffset;
+    var offsetX;
+    var offsetY;
+
+    var isDrawing = false;
+
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+
+    var imageObj = new Image();
+    imageObj.onload = function() {
+      canvas.width=imageObj.width;
+      canvas.height=imageObj.height;
+      ctx.drawImage(imageObj, 0, 0);
+    };
+    imageObj.src = 'imagen2.jpg';
+    ctx.lineWidth = 0.6;
+
+    canvasOffset = $("#canvas").offset();
+    offsetX = canvasOffset.left;
+    offsetY = canvasOffset.top;
+
+    $("#canvas").on('mousedown', function (e) {
+        handleMouseDown(e);
+    }).on('mouseup', function(e) {
+        handleMouseUp(e);
+    }).on('mousemove', function(e) {
+        handleMouseMove(e);
+    });
+
+
+    var startX;
+    var startY;
+
+    function handleMouseUp(e) {
+	    endX = parseInt(e.clientX - offsetX);
+	    endY = parseInt(e.clientY - offsetY);
+	    isDrawing = false;
+	    canvas.style.cursor = "default";
+        alert("(x1:"+startX+"- y1:"+ startY+"), (x2:"+endX+ ", y2:"+endY+")");	
+    }
+
+    function handleMouseMove(e) {
+	   
+		    var mouseX = parseInt(e.clientX - offsetX);
+		    var mouseY = parseInt(e.clientY - offsetY);	
+            ctx.clearRect(0, 0, canvas.width, canvas.height);		
+            ctx.drawImage(imageObj, 0, 0);
+	        ctx.beginPath();
+            ctx.moveTo(0,mouseY);
+            ctx.lineTo(canvas.width,mouseY);
+            ctx.moveTo(mouseX,0);
+            ctx.lineTo(mouseX,canvas.height);           
+            if (isDrawing) {					
+		        ctx.rect(startX, startY, mouseX - startX, mouseY - startY);	
+	        }	
+		    ctx.stroke();	
+
+    }
+
+    function handleMouseDown(e) {
+	    canvas.style.cursor = "crosshair";		
+	    isDrawing = true
+	    startX = parseInt(e.clientX - offsetX);
+	    startY = parseInt(e.clientY - offsetY);
+    }
+
+
+</script>
+
