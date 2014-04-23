@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from segment.views import home
-from segment.views import LImages
+from segment.views import LImages, SegmentImage
 from django.contrib import admin
 admin.autodiscover()
 
@@ -10,5 +10,6 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
     url(r'^$', home, name='home'),
     url(r'^limages/',LImages.as_view(),name='limages' ),
+    url(r'^segment_image/',SegmentImage.as_view(),name='segment_image' ),
     url(r'^admin/', include(admin.site.urls)),
 )

@@ -1,12 +1,65 @@
 {% extends "base.html" %}
-
+{% load widget_tweaks%}
 
 {% block header%}  
+    <script type="text/javascript" src="/static/bootstrap.file-input.js"></script>
+
+    <script type="text/javascript">
+    
+        function select_row(id) {
+            document.getElementById('id_selected_row').value = id;
+        }
+
+        $( document ).ready(function() {
+            $('input[type=file]').bootstrapFileInput();
+            $('.file-inputs').bootstrapFileInput();
+        });
+    </script>
 
 {%endblock%}
 
 {%block content %}
-   
+
+<form role="form" id="id_form_limages" name="form_limages" action='/limages/' method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+   <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
+  
+   <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_CreateImage">Add Image</button>
+    <br/><br/>
+    {% if images%}
+        <div class="table-responsive">
+            <table class="table">
+                <tr>
+                    <th>Name</th>
+                    <th>Filename</th>
+                    <th>Image Type</th>
+                    <th>Image</th>
+                    <th></th>
+                </tr>
+                {% for image in images %}
+                    <tr>
+                        <td>{{image.name}}</td>
+                        <td>{{image.filename}}</td>
+                        <td>{{image.image_type}}</td> 
+                        <td><img class="media-object" src="/static/{{image.filename}}" style="max-width:70px;max-height:70px;"></td> 
+                        <td>
+                            <a href="/segment_image/?id={{image.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-pencil"></span></a>
+                    
+                            <a href="/segment_image/?id={{image.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-wrench"></span></a>
+                            <button type="submit" class="btn btn-default" id="id_btn_remove_image" name="btn_remove_image" onclick="if (confirm('Are you sure you want to remove this image?')){select_row({{image.id}}); return true;}else {return false;}">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </td>  
+                    <tr/>
+                {% endfor%}
+            </table>
+        </div>
+    {% endif%}
+</form>
+
+    {% include "modal_image.html" with form_image=form_image id_modal="CreateImage" %}
 
 {% endblock %}
+
+
 

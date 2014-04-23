@@ -1,0 +1,36 @@
+{% load widget_tweaks%}
+<!-- Modal -->
+<div class="modal fade" id="myModal_{{id_modal}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Image</h4>
+      </div>
+      <form role="form" id="id_form_create_image" name="form_create_image" action='/limages/' method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+          <input type="hidden" id="id_id" name="id" value="{{form_image.id}}"/>
+          <div class="modal-body">
+            <div class="form-group">
+                <label for="id_name">Name</label>
+                {{form_image.name | add_class:"form-control" | attr:"required:True" }}
+            </div>
+            <div class="form-group">
+                <label for="id_image_type">Image Type</label>
+                {{form_image.image_type | add_class:"form-control" | attr:"required:True"}}
+            </div>
+            <div class="form-group">
+                <label for="id_file">File </label><br/>
+                {{form_image.filename | attr:"data-filename-placement:inside" | attr:"required:True"}}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <input id="id_btn_create_image"" name="btn_create_image" class="btn btn-primary" type="submit" value="Create"/>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
