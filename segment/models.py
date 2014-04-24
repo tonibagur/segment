@@ -18,7 +18,8 @@ class ImageType(models.Model):
 class Image(models.Model):
     name = models.CharField(max_length=50)
     filename = models.ImageField(upload_to='uploads/')
-    image_type = models.ForeignKey(ImageType)  
+    image_type = models.ForeignKey(ImageType) 
+    parent_image = models.ForeignKey('self', null=True)   
 
     def __unicode__(self):
         return self.name
@@ -37,6 +38,7 @@ class Segment(models.Model):
     y2 = models.FloatField(default=0)   
     image = models.ForeignKey(Image)                                                                                                                                                             
     tags = models.ManyToManyField(Tag,blank=True)
+    filename = models.CharField(max_length=200,blank=True)
     
 
     

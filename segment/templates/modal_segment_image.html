@@ -1,0 +1,49 @@
+{% load widget_tweaks%}
+
+<!-- Modal -->
+<div class="modal fade" id="myModal_Segment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Segment</h4>
+      </div>
+      <form role="form" id="id_form_create_segment" name="form_create_segment" action='/segment_image/' method="POST">
+      {% csrf_token %}
+          <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
+          <div class="modal-body">
+            <div class="form-group">
+                <label for="id_name">Coord. (x1,y1)</label>   
+                <div class="row">
+                    <div class="col-md-6">
+                        {{form_segment.x1 | add_class:"form-control" | attr:"required:True" }}
+                    </div>
+                    <div class="col-md-6">
+                        {{form_segment.y1 | add_class:"form-control" | attr:"required:True" }}
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_name">Coord. (x2,y2)</label>   
+                <div class="row">
+                    <div class="col-md-6">
+                        {{form_segment.x2 | add_class:"form-control" | attr:"required:True" }}
+                    </div>
+                    <div class="col-md-6">
+                        {{form_segment.y2 | add_class:"form-control" | attr:"required:True" }}
+                    </div>                    
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_tags">Tags </label><br/>
+                {{form_segment.tags | add_class:"form-control" | attr:"required:True" }}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <input id="id_btn_create_segment" name="btn_create_segment" class="btn btn-primary" type="submit" value="Create"/>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>

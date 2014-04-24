@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load widget_tweaks%}
+
+{% block header%}  
+    <script type="text/javascript" src="/static/bootstrap.file-input.js"></script>
+
+    <script type="text/javascript">
+    
+        function select_row(id) {
+            document.getElementById('id_selected_row').value = id;
+        }
+
+        $( document ).ready(function() {
+            $('input[type=file]').bootstrapFileInput();
+            $('.file-inputs').bootstrapFileInput();
+        });
+    </script>
+
+{%endblock%}
+
+{%block content %}
+
+<form role="form" id="id_form_edit_image" name="form_edit_image" action='/edit_image/' method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+
+          <input type="hidden" id="id_id" name="id" value="{{id_image}}"/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_name">Name</label>
+                </div>
+                <div class="col-md-4">
+                    {{form_image.name | add_class:"form-control" | attr:"required:True" }}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_image_type">Image Type</label>
+                </div>
+                <div class="col-md-4">
+                    {{form_image.image_type | add_class:"form-control" | attr:"required:True"}}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_file">File </label><br/>
+                </div>
+                <div class="col-md-4">
+                    {{form_image.filename | attr:"data-filename-placement:inside"}}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_file">Image </label><br/>
+                </div>
+                <div class="col-md-10">
+                <img class="media-object" src="/static/{{form_image.filename.value}}" style="max-width:400px;max-height:400px;">
+            </div>
+            <a href="/limages/" class="btn btn-default" role="button">Back</a>
+            <input id="id_btn_save_image"" name="btn_save_image" class="btn btn-primary" type="submit" value="Save"/>
+  
+</form>
+
+{% endblock %}
+
+
+

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load widget_tweaks%}
+
+{% block header%}  
+
+{%endblock%}
+
+{%block content %}
+
+<form role="form" id="id_form_edit_segment" name="form_edit_segment" action='/edit_segment/' method="POST">
+{% csrf_token %}
+
+          <input type="hidden" id="id_id" name="id" value="{{id_segment}}"/>
+          <input type="hidden" id="id_image" name="image" value="{{form_segment.image.value}}"/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_name">Coord. 1</label>
+                </div>
+                <div class="col-md-2">
+                    {{form_segment.x1 | add_class:"form-control" | attr:"required:True" }}
+                </div>
+                <div class="col-md-2">
+                    {{form_segment.y1 | add_class:"form-control" | attr:"required:True" }}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_name">Coord. 2</label>
+                </div>
+                <div class="col-md-2">
+                    {{form_segment.x2 | add_class:"form-control" | attr:"required:True" }}
+                </div>
+                <div class="col-md-2">
+                    {{form_segment.y2 | add_class:"form-control" | attr:"required:True" }}
+                </div>
+            </div>
+
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_filename">Filename</label>
+                </div>
+                <div class="col-md-4">
+                    {{form_segment.filename | add_class:"form-control" | attr:"required:True" }}
+                </div>
+            </div>
+            <br/>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_tags">Tags</label>
+                </div>
+                <div class="col-md-4">
+                    {{form_segment.tags | add_class:"form-control" | attr:"required:True" }}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="id_file">Image </label><br/>
+                </div>
+                <div class="col-md-10">
+                <img class="media-object" src="/static/{{form_segment.filename.value}}" style="max-width:400px;max-height:400px;">
+            </div>
+            <br/>
+            <hr>
+            <input id="id_btn_return" name="btn_return" class="btn btn-default" type="submit" value="Back"/>
+            <input id="id_btn_save_segment"" name="btn_save_segment" class="btn btn-primary" type="submit" value="Save"/>
+  
+</form>
+
+{% endblock %}
+
+
+

@@ -7,8 +7,12 @@ from django.views.generic import ListView
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
-from models import Image, ImageType
-from segment.forms import ImageForm,SegmentForm
+from models import Image, ImageType, Segment,Tag
+from segment.forms import ImageForm,SegmentForm,GenerateImageForm
+from settings import BASE_DIR
+import os
+import PIL
+import traceback
 
 
 
@@ -29,16 +33,23 @@ class LImages(ListView):
     view_name = 'LImages'
     header = 'Images list'
 
+    def get(self,request):
+        self.id_image = self.image_type_sel = ''
+        if 'image_type' in request.GET:
+            self.image_type_sel = int(request.GET['image_type'])
+            self.queryset = Image.objects.filter(image_type_id=self.image_type_sel)
+        return super(LImages, self).get(request)
  
     def get_context_data(self, **kwargs):
         context = super(LImages, self).get_context_data(**kwargs)
         context['header'] = self.header
         context['form_image'] = ImageForm()
+        context['image_types'] = ImageType.objects.all()
+        context['image_type_sel'] = self.image_type_sel
         return context
 
     def post(self,request):
         if 'btn_create_image' in request.POST:
-            print "request.FILES", request.FILES
             form_image = ImageForm(request.POST,request.FILES) 
             if form_image.is_valid():
                 form_image.save()
@@ -46,6 +57,9 @@ class LImages(ListView):
             id_image = request.POST['selected_row']
             image = Image.objects.get(id = id_image)
             if image:
+                filepath = BASE_DIR+'/segment/static/'+str(image.filename)
+                if os.path.isfile(filepath):
+                    os.remove(filepath)
                 image.delete()
         return HttpResponseRedirect('/limages/') 
 
@@ -61,7 +75,6 @@ class SegmentImage(TemplateView):
             self.id_image = int(request.GET['id'])
         return super(SegmentImage, self).get(request)
 
-
     def get_context_data(self, **kwargs):
         context = super(SegmentImage, self).get_context_data(**kwargs)
         context['header'] = self.header
@@ -69,20 +82,115 @@ class SegmentImage(TemplateView):
             context['id_image'] = self.id_image
             image = Image.objects.get(id=self.id_image)
             context['form'] = ImageForm(instance=image)
-            context['form_segment'] = SegmentForm()
-            print context['form']
+            new_segment = Segment(image=image)
+            context['form_segment'] = SegmentForm(instance=new_segment)
+            context['segments'] = Segment.objects.filter(image_id=self.id_image)
+            context['form_generate_image'] = GenerateImageForm()
         return context
 
     def post(self,request):
         id_image=''
         if 'image' in request.POST:
             id_image = request.POST['image']
-        if 'btn_create_segment' in request.POST:
-            form_segment = SegmentForm(request.POST) 
-            if form_segment.is_valid():
-                form_segment.save()
-            
+            path_segments = BASE_DIR+'/segment/static/uploads/segments/'
+            if 'btn_create_segment' in request.POST:
+                form_segment = SegmentForm(request.POST) 
+                if form_segment.is_valid():
+                    try:   
+                        #TODO primer crear imatge i dsp guardar segment, no a l'inreves
+                        segment = form_segment.save()   #commit=False  
+                        filename = 'segment_'+str(id_image)+"_"+str(segment.id)+'.jpg'
+                        segment.filename = 'uploads/segments/'+filename
+                        segment.save() 
+                        x1=int(request.POST['x1'])
+                        y1=int(request.POST['y1'])
+                        x2=int(request.POST['x2'])
+                        y2=int(request.POST['y2'])
+                        image = Image.objects.get(id=id_image)
+                        image_path = BASE_DIR+'/segment/static/'+str(image.filename)
+                        i = PIL.Image.open(image_path)
+                        filepath_segment = path_segments +filename
+                        i.crop((x1,y1,x2,y2)).save(filepath_segment)  
+                        segment = form_segment.save()
+                    except:
+                        traceback.print_exc()
+            elif 'btn_generate_images' in request.POST:
+                form_generate_images = GenerateImagesForm(request.POST)
+                if form_generate_images.is_valid():
+                    pass
+            elif 'btn_remove_segment' in request.POST:
+                id_segment = request.POST['selected_row']
+                segment = Segment.objects.get(id = id_segment)
+                if segment:
+                    filepath = path_segments+'segment_'+str(id_image)+"_"+str(segment.id)+'.jpg'
+                    if os.path.isfile(filepath):
+                        os.remove(filepath)
+                    segment.delete()
         return HttpResponseRedirect('/segment_image/?id='+id_image) 
+
+
+class EditImage(TemplateView):
+    template_name='details_image.html'
+    header = 'Details Image'
+
+    def get(self,request):
+        self.id_image = ''
+        if 'id' in request.GET:
+            self.id_image = int(request.GET['id'])
+        return super(EditImage, self).get(request)
+
+    def get_context_data(self, **kwargs):
+        context = super(EditImage, self).get_context_data(**kwargs)
+        context['header'] = self.header
+        if self.id_image:
+            context['id_image'] = self.id_image
+            image = Image.objects.get(id=self.id_image)
+            context['form_image'] = ImageForm(instance=image)
+        return context
+
+    def post(self,request):
+        id_image=''
+        if 'id' in request.POST and 'btn_save_image' in request.POST:
+            id_image = request.POST['id']
+            image = Image.objects.get(id=id_image)
+            form_image = ImageForm(request.POST,request.FILES, instance=image) 
+            if form_image.is_valid():
+                form_image.save()          
+        return HttpResponseRedirect('/edit_image/?id='+id_image) 
+
+class EditSegment(TemplateView):
+    template_name='details_segment.html'
+    header = 'Details Segment'
+
+    def get(self,request):
+        self.id_segment = ''
+        if 'id' in request.GET:
+            self.id_segment = int(request.GET['id'])
+        return super(EditSegment, self).get(request)
+
+    def get_context_data(self, **kwargs):
+        context = super(EditSegment, self).get_context_data(**kwargs)
+        context['header'] = self.header
+        if self.id_segment:
+            context['id_segment'] = self.id_segment
+            segment = Segment.objects.get(id=self.id_segment)
+            context['form_segment'] = SegmentForm(instance=segment)
+        return context
+
+    def post(self,request):
+        id_segment=''
+        if 'id' in request.POST:
+            id_segment = request.POST['id'] 
+            segment = Segment.objects.get(id=id_segment)
+            if 'btn_save_segment' in request.POST:
+                form_segment = SegmentForm(request.POST, instance=segment) 
+                if form_segment.is_valid():
+                    form_segment.save()     
+                else:
+                    print form_segment.errors
+            elif 'btn_return' in request.POST:
+                return HttpResponseRedirect('/segment_image/?id='+str(segment.image_id))        
+        return HttpResponseRedirect('/edit_segment/?id='+id_segment) 
 
 
 

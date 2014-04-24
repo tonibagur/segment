@@ -3,192 +3,216 @@
 
 {%block title %} Selector de imatges {% endblock%}
 {% block header%}  
-  <style>
+    <script type="text/javascript">
+    
+        function select_row(id) {
+            document.getElementById('id_selected_row').value = id;
+        }
+
+
+        $( document ).ready(function() {
+            var platform='pc';
+	        var start='';
+            var stop='';
+            var move='';        
+            if (platform=='iOS' || platform=='Android') {
+                start='touchstart';
+                stop='touchend';
+                move='touchmove';
+            } else if (platform=='pc') {
+                start='mousedown';
+                stop='mouseup';
+                move='mousemove';
+            }
+            var canvas;
+            var ctx;
+
+            var canvasOffset;
+            var offsetX;
+            var offsetY;
+
+            var isDrawing = false;
+
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
+
+            var imageObj = new Image();
+            imageObj.onload = function() {
+              canvas.width=imageObj.width;
+              canvas.height=imageObj.height;
+                ctx.scale(1, 1);
+                ctx.drawImage(imageObj, 0, 0);
+            };
+            imageObj.src = '/static/{{form.filename.value}}';
+            ctx.lineWidth = 1;
+            
+            canvasOffset = $("#canvas").offset();
+            offsetX = canvasOffset.left;
+            offsetY = canvasOffset.top;
+
+            $("#canvas").on(start, function (e) {
+                handleMouseDown(e);
+            }).on(stop, function(e) {
+                handleMouseUp(e);
+            }).on(move, function(e) {
+                handleMouseMove(e);
+            }).on('mouseout', function(e) {
+                handleMouseOut(e);
+            });
+
+
+
+            var startX;
+            var startY;
+
+            function get_clientX(e) {
+                if (platform=='iOS' || platform=='Android') {
+                    return e.touches[0].clientX;
+                } else if (platform=='pc') {
+                    return e.clientX;
+                }
+            }
+
+            function get_clientY(e) {
+                if (platform=='iOS' || platform=='Android') {
+                    return e.touches[0].clientY;
+                } else if (platform=='pc') {
+                    return e.clientY;
+                }
+            }
+
+            function handleMouseUp(e) {
+                e.preventDefault();
+	            endX = parseInt(get_clientX(e) - offsetX);
+	            endY = parseInt(get_clientY(e) - offsetY);
+	            isDrawing = false;
+	            canvas.style.cursor = "default";	
+                if (startX > endX) {
+                    x = startX;
+                    startX = endX;
+                    endX = x;
+                }
+                if (startY > endY) {
+                    y = startY;
+                    startY = endY;
+                    endY = y;
+                }
+                document.getElementById('id_x1').value=startX;
+                document.getElementById('id_y1').value=startY;
+                document.getElementById('id_x2').value=endX;
+                document.getElementById('id_y2').value=endY;
+                $('#myModal_Segment').modal('show');
+            }
+
+            function handleMouseMove(e) {
+                    e.preventDefault();
+		            var mouseX = parseInt(get_clientX(e) - offsetX);// + $(document).scrollLeft();
+		            var mouseY = parseInt(get_clientY(e) - offsetY) + $(document).scrollTop();	
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);		
+                    ctx.drawImage(imageObj, 0, 0);
+	                ctx.beginPath();
+                    ctx.moveTo(0,mouseY);
+                    ctx.lineTo(canvas.width,mouseY);
+                    ctx.moveTo(mouseX,0);
+                    ctx.lineTo(mouseX,canvas.height);           
+                    if (isDrawing) {					
+		                ctx.rect(startX, startY, mouseX - startX, mouseY - startY);	
+	                }	
+		            ctx.stroke();	
+
+            }
+
+            function handleMouseDown(e) {
+                e.preventDefault();
+	            canvas.style.cursor = "crosshair";		
+	            isDrawing = true
+	            startX = parseInt(get_clientX(e) - offsetX);
+	            startY = parseInt(get_clientY(e) - offsetY);
+            }
+
+            function handleMouseOut(e) {
+                e.preventDefault();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);		
+                ctx.drawImage(imageObj, 0, 0);
+            }
+        });
+    </script>
+
+    <style>
         canvas {
             border:1px solid #428bca;
             display: inline-block;
         }
-  </style>
+    </style>
 {%endblock%}
 
 {%block content %}
+
+<form role="form" id="id_form_segment_image" name="form_segment_image" action='/segment_image/' method="POST">
+{% csrf_token %}
+   <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
+   <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
+
     <div id="id_div_canvas">
         <canvas id="canvas"></canvas>
     </div>
+    <br/>
+
+    {% if segments %}
+        <h4>Segments</h4>
+        <br/>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <tr>
+                    <th>Segment Image</th>
+                    <th>Filename</th>
+                    <th>Coord. 1</th>
+                    <th>Coord. 2</th>
+                    <th>Tags</th>
+                    <th></th>
+                </tr>
+                {%for segment in segments %}
+                    <tr>
+                        <td><img class="media-object" src="/static/uploads/segments/segment_{{id_image}}_{{segment.id}}.jpg" style="max-width:70px;max-height:50px;"/></td>
+                        <td>{{segment.filename}}</td>
+                        <td>({{segment.x1}}, {{segment.y1}})</td>
+                        <td>({{segment.x2}}, {{segment.y2}})</td>
+                        <td>{% for tag in segment.tags.all %} {{tag}} {%endfor%}</td>
+                        <td>       
+                            <a href="/edit_segment/?id={{segment.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-pencil"></span></a>                    
+                            <button type="submit" class="btn btn-default" id="id_btn_remove_segment" name="btn_remove_segment" onclick="if (confirm('Are you sure you want to remove this segment?')){select_row({{segment.id}}); return true;}else {return false;}">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+
     <hr>
     <div>
+        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_GenerateImages">Generate Images</button>
         <a href="/limages/" class="btn btn-default" role="button">Back</a>
     </div>
+    <br/><br/><br/><br/><br/><br/>
 
-    <!-- Modal -->
-    <div class="modal fade" id="myModal_Segment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="myModalLabel">Segment</h4>
-          </div>
-          <form role="form" id="id_form_create_segment" name="form_create_segment" action='/segment_image/' method="POST">
-          {% csrf_token %}
-              <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
-              <div class="modal-body">
-                <div class="form-group">
-                    <label for="id_name">Coordenadas (x1,y1)</label>   
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{form_segment.x1 | add_class:"form-control" | attr:"required:True" }}
-                        </div>
-                        <div class="col-md-6">
-                            {{form_segment.y1 | add_class:"form-control" | attr:"required:True" }}
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="id_name">Coordenadas (x2,y2)</label>   
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{form_segment.x2 | add_class:"form-control" | attr:"required:True" }}
-                        </div>
-                        <div class="col-md-6">
-                            {{form_segment.y2 | add_class:"form-control" | attr:"required:True" }}
-                        </div>                    
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="id_file">Tags </label><br/>
-                    {{form_segment.tags | add_class:"form-control" | attr:"required:True" }}
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <input id="id_btn_create_segment" name="btn_create_segment" class="btn btn-primary" type="submit" value="Create"/>
-              </div>
-          </form>
-        </div>
-      </div>
-    </div>
+
+
+</form>
+
+
+{% include "modal_segment_image.html" with form_segment=form_segment %}
+
+{% include "modal_generate_images.html" with form_generate_images=form_generate_images %}
 
 
 
 
-    <script type="text/javascript">
-
-        var platform='pc';
-	    var start='';
-        var stop='';
-        var move='';        
-        if (platform=='iOS' || platform=='Android') {
-            start='touchstart';
-            stop='touchend';
-            move='touchmove';
-        } else if (platform=='pc') {
-            start='mousedown';
-            stop='mouseup';
-            move='mousemove';
-        }
-        var canvas;
-        var ctx;
-
-        var canvasOffset;
-        var offsetX;
-        var offsetY;
-
-        var isDrawing = false;
-
-        canvas = document.getElementById("canvas");
-        ctx = canvas.getContext("2d");
-
-        var imageObj = new Image();
-        imageObj.onload = function() {
-          canvas.width=imageObj.width;
-          canvas.height=imageObj.height;
-          ctx.drawImage(imageObj, 0, 0);
-        };
-        imageObj.src = '/static/{{form.filename.value}}';
-        ctx.lineWidth = 1;
-
-        canvasOffset = $("#canvas").offset();
-        offsetX = canvasOffset.left;
-        offsetY = canvasOffset.top;
-
-        $("#canvas").on(start, function (e) {
-            handleMouseDown(e);
-        }).on(stop, function(e) {
-            handleMouseUp(e);
-        }).on(move, function(e) {
-            handleMouseMove(e);
-        });
 
 
-        var startX;
-        var startY;
 
-        function get_clientX(e) {
-            if (platform=='iOS' || platform=='Android') {
-                return e.touches[0].clientX;
-            } else if (platform=='pc') {
-                return e.clientX;
-            }
-        }
-
-        function get_clientY(e) {
-            if (platform=='iOS' || platform=='Android') {
-                return e.touches[0].clientY;
-            } else if (platform=='pc') {
-                return e.clientY;
-            }
-        }
-
-        function handleMouseUp(e) {
-            e.preventDefault();
-	        endX = parseInt(get_clientX(e) - offsetX);
-	        endY = parseInt(get_clientY(e) - offsetY);
-	        isDrawing = false;
-	        canvas.style.cursor = "default";	
-            if (startX > endX) {
-                x = startX;
-                startX = endX;
-                endX = x;
-            }
-            if (startY > endY) {
-                y = startY;
-                startY = endY;
-                endY = y;
-            }
-            document.getElementById('id_x1').value=startX;
-            document.getElementById('id_y1').value=startY;
-            document.getElementById('id_x2').value=endX;
-            document.getElementById('id_y2').value=endY;
-            $('#myModal_Segment').modal('show');
-        }
-
-        function handleMouseMove(e) {
-                e.preventDefault();
-		        var mouseX = parseInt(get_clientX(e) - offsetX);
-		        var mouseY = parseInt(get_clientY(e) - offsetY);	
-                ctx.clearRect(0, 0, canvas.width, canvas.height);		
-                ctx.drawImage(imageObj, 0, 0);
-	            ctx.beginPath();
-                ctx.moveTo(0,mouseY);
-                ctx.lineTo(canvas.width,mouseY);
-                ctx.moveTo(mouseX,0);
-                ctx.lineTo(mouseX,canvas.height);           
-                if (isDrawing) {					
-		            ctx.rect(startX, startY, mouseX - startX, mouseY - startY);	
-	            }	
-		        ctx.stroke();	
-
-        }
-
-        function handleMouseDown(e) {
-            e.preventDefault();
-	        canvas.style.cursor = "crosshair";		
-	        isDrawing = true
-	        startX = parseInt(get_clientX(e) - offsetX);
-	        startY = parseInt(get_clientY(e) - offsetY);
-        }
-
-    </script>
 
 {% endblock %}
 
