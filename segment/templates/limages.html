@@ -22,15 +22,17 @@
 
 <form role="form" id="id_form_limages" name="form_limages" action='/limages/' method="POST" enctype="multipart/form-data">
 {% csrf_token %}
-   <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
+    <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
+    <input type="hidden" id="id_image_type_sel" name="image_type_sel" value="{{image_type_sel}}"/>
   
-    <ul class="nav nav-pills nav-justified">
+    <ul class="nav nav-pills">
     {% for type in image_types%}
         <li {% if image_type_sel == type.id%}class="active"{%endif%}><a href="/limages/?image_type={{type.id}}">{{type.name}}</a></li>
     {% endfor %}
     </ul>
+
     <br/>
-   <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_CreateImage">Add Image</button>
+    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_CreateImage">Add Image</button>
     <br/><br/>
     {% if images%}
         <div class="table-responsive">

@@ -11,6 +11,7 @@
       <form role="form" id="id_form_create_segment" name="form_create_segment" action='/segment_image/' method="POST">
       {% csrf_token %}
           <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
+          <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
           <div class="modal-body">
             <div class="form-group">
                 <label for="id_name">Coord. (x1,y1)</label>   

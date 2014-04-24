@@ -34,10 +34,11 @@ class LImages(ListView):
     header = 'Images list'
 
     def get(self,request):
-        self.id_image = self.image_type_sel = ''
+        self.id_image = ''
+        self.image_type_sel = 1 #Default
         if 'image_type' in request.GET:
             self.image_type_sel = int(request.GET['image_type'])
-            self.queryset = Image.objects.filter(image_type_id=self.image_type_sel)
+        self.queryset = Image.objects.filter(image_type_id=self.image_type_sel)
         return super(LImages, self).get(request)
  
     def get_context_data(self, **kwargs):
@@ -49,6 +50,9 @@ class LImages(ListView):
         return context
 
     def post(self,request):
+        image_type = ''
+        if 'image_type_sel' in request.POST:
+            image_type = request.POST['image_type_sel']
         if 'btn_create_image' in request.POST:
             form_image = ImageForm(request.POST,request.FILES) 
             if form_image.is_valid():
@@ -61,7 +65,7 @@ class LImages(ListView):
                 if os.path.isfile(filepath):
                     os.remove(filepath)
                 image.delete()
-        return HttpResponseRedirect('/limages/') 
+        return HttpResponseRedirect('/limages/?image_type='+str(image_type)) 
 
 
 class SegmentImage(TemplateView):
@@ -71,8 +75,11 @@ class SegmentImage(TemplateView):
 
     def get(self,request):
         self.id_image = ''
+        self.zoom = 1
         if 'id' in request.GET:
             self.id_image = int(request.GET['id'])
+            if 'zoom' in request.GET:
+                self.zoom = request.GET['zoom'] or 1
         return super(SegmentImage, self).get(request)
 
     def get_context_data(self, **kwargs):
@@ -86,13 +93,16 @@ class SegmentImage(TemplateView):
             context['form_segment'] = SegmentForm(instance=new_segment)
             context['segments'] = Segment.objects.filter(image_id=self.id_image)
             context['form_generate_image'] = GenerateImageForm()
+            context['zoom'] = self.zoom
         return context
 
     def post(self,request):
-        id_image=''
+        id_image=zoom=''
         if 'image' in request.POST:
             id_image = request.POST['image']
             path_segments = BASE_DIR+'/segment/static/uploads/segments/'
+            if 'zoom' in request.POST:
+                zoom = float(request.POST['zoom'])
             if 'btn_create_segment' in request.POST:
                 form_segment = SegmentForm(request.POST) 
                 if form_segment.is_valid():
@@ -126,7 +136,15 @@ class SegmentImage(TemplateView):
                     if os.path.isfile(filepath):
                         os.remove(filepath)
                     segment.delete()
-        return HttpResponseRedirect('/segment_image/?id='+id_image) 
+            elif 'btn_zoom_in' in request.POST:
+                if zoom < 5:
+                    zoom = zoom+0.2
+                return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom))
+            elif 'btn_zoom_out' in request.POST:
+                if zoom > 0.2:
+                    zoom = zoom-0.2
+                return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom))
+        return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom)) 
 
 
 class EditImage(TemplateView):

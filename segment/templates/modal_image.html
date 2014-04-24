@@ -10,6 +10,7 @@
       <form role="form" id="id_form_create_image" name="form_create_image" action='/limages/' method="POST" enctype="multipart/form-data">
       {% csrf_token %}
           <input type="hidden" id="id_id" name="id" value="{{form_image.id}}"/>
+          <input type="hidden" id="id_image_type_sel" name="image_type_sel" value="{{image_type_sel}}"/>
           <div class="modal-body">
             <div class="form-group">
                 <label for="id_name">Name</label>

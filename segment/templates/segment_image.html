@@ -38,9 +38,9 @@
 
             var imageObj = new Image();
             imageObj.onload = function() {
-              canvas.width=imageObj.width;
-              canvas.height=imageObj.height;
-                ctx.scale(1, 1);
+                canvas.width=imageObj.width*{{zoom}};
+                canvas.height=imageObj.height*{{zoom}};
+                ctx.scale({{zoom}}, {{zoom}});
                 ctx.drawImage(imageObj, 0, 0);
             };
             imageObj.src = '/static/{{form.filename.value}}';
@@ -83,8 +83,8 @@
 
             function handleMouseUp(e) {
                 e.preventDefault();
-	            endX = parseInt(get_clientX(e) - offsetX);
-	            endY = parseInt(get_clientY(e) - offsetY);
+	            endX = parseInt(get_clientX(e) - offsetX + $(document).scrollLeft());
+	            endY = parseInt(get_clientY(e) - offsetY + $(document).scrollTop());
 	            isDrawing = false;
 	            canvas.style.cursor = "default";	
                 if (startX > endX) {
@@ -97,26 +97,26 @@
                     startY = endY;
                     endY = y;
                 }
-                document.getElementById('id_x1').value=startX;
-                document.getElementById('id_y1').value=startY;
-                document.getElementById('id_x2').value=endX;
-                document.getElementById('id_y2').value=endY;
+                document.getElementById('id_x1').value = parseInt(startX/{{zoom}});
+                document.getElementById('id_y1').value = parseInt(startY/{{zoom}});
+                document.getElementById('id_x2').value = parseInt(endX/{{zoom}});
+                document.getElementById('id_y2').value = parseInt(endY/{{zoom}});
                 $('#myModal_Segment').modal('show');
             }
 
             function handleMouseMove(e) {
                     e.preventDefault();
-		            var mouseX = parseInt(get_clientX(e) - offsetX);// + $(document).scrollLeft();
-		            var mouseY = parseInt(get_clientY(e) - offsetY) + $(document).scrollTop();	
+		            var mouseX = parseInt(get_clientX(e) - offsetX + $(document).scrollLeft());
+		            var mouseY = parseInt(get_clientY(e) - offsetY + $(document).scrollTop());	
                     ctx.clearRect(0, 0, canvas.width, canvas.height);		
                     ctx.drawImage(imageObj, 0, 0);
 	                ctx.beginPath();
-                    ctx.moveTo(0,mouseY);
-                    ctx.lineTo(canvas.width,mouseY);
-                    ctx.moveTo(mouseX,0);
-                    ctx.lineTo(mouseX,canvas.height);           
+                    ctx.moveTo(0,mouseY/{{zoom}});
+                    ctx.lineTo(canvas.width/{{zoom}},mouseY/{{zoom}});
+                    ctx.moveTo(mouseX/{{zoom}},0);
+                    ctx.lineTo(mouseX/{{zoom}},canvas.height/{{zoom}});           
                     if (isDrawing) {					
-		                ctx.rect(startX, startY, mouseX - startX, mouseY - startY);	
+		                ctx.rect(startX/{{zoom}}, startY/{{zoom}}, (mouseX - startX)/{{zoom}}, (mouseY - startY)/{{zoom}});	
 	                }	
 		            ctx.stroke();	
 
@@ -126,8 +126,8 @@
                 e.preventDefault();
 	            canvas.style.cursor = "crosshair";		
 	            isDrawing = true
-	            startX = parseInt(get_clientX(e) - offsetX);
-	            startY = parseInt(get_clientY(e) - offsetY);
+	            startX = parseInt(get_clientX(e) - offsetX + $(document).scrollLeft());
+	            startY = parseInt(get_clientY(e) - offsetY + $(document).scrollTop());
             }
 
             function handleMouseOut(e) {
@@ -150,9 +150,17 @@
 
 <form role="form" id="id_form_segment_image" name="form_segment_image" action='/segment_image/' method="POST">
 {% csrf_token %}
-   <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
-   <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
+    <input type="hidden" id="id_selected_row" name="selected_row" value=""/>   
+    <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
+    <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
 
+    <button type="submit" class="btn btn-default" id="id_btn_zoom_in" name="btn_zoom_in">
+        <span class="glyphicon glyphicon-zoom-in"></span>
+    </button>
+    <button type="submit" class="btn btn-default" id="id_btn_zoom_out" name="btn_zoom_out">
+        <span class="glyphicon glyphicon-zoom-out"></span>
+    </button>
+    <br/><br/>
     <div id="id_div_canvas">
         <canvas id="canvas"></canvas>
     </div>
