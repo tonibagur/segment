@@ -15,14 +15,6 @@ class ImageType(models.Model):
     def __unicode__(self):
         return self.name
 
-class Image(models.Model):
-    name = models.CharField(max_length=50)
-    filename = models.ImageField(upload_to='uploads/')
-    image_type = models.ForeignKey(ImageType) 
-    parent_segment = models.ForeignKey('Segment', related_name='parent_segment', blank=True, null=True)   
-
-    def __unicode__(self):
-        return self.name
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)
@@ -36,9 +28,23 @@ class Segment(models.Model):
     y1 = models.FloatField(default=0)
     x2 = models.FloatField(default=0)
     y2 = models.FloatField(default=0)   
-    image = models.ForeignKey(Image)                                                                                                                                                             
+    image = models.ForeignKey('Image')                                                                                                                                                             
     tags = models.ManyToManyField(Tag,blank=True)
     filename = models.CharField(max_length=200,blank=True)
+
+class Image(models.Model):
+    name = models.CharField(max_length=50)
+    filename = models.ImageField(upload_to='uploads/')
+    image_type = models.ForeignKey(ImageType) 
+    parent_segment = models.ForeignKey('Segment', related_name='parent_segment', blank=True, null=True)    
+
+    def __unicode__(self):
+        return self.name
+
+    def get_count_segments(self):
+        return len(Segment.objects.filter(image=self)) 
+
+
     
 
     

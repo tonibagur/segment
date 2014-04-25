@@ -45,6 +45,7 @@
                     <th>Filename</th>
                     <th>Image Type</th>
                     <th>Image</th>
+                    <th>Segments</th>
                     <th></th>
                 </tr>
                 {% for image in images %}
@@ -53,11 +54,12 @@
                         <td>{{image.filename}}</td>
                         <td>{{image.image_type}}</td> 
                         <td><img class="media-object" src="/static/{{image.filename}}" style="max-width:70px;max-height:70px;"></td> 
+                        <td>{{image.get_count_segments}}</td>
                         <td>
                             <a href="/edit_image/?id={{image.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-pencil"></span></a>
                     
                             <a href="/segment_image/?id={{image.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-picture"></span></a>
-                            <button type="submit" class="btn btn-default" id="id_btn_remove_image" name="btn_remove_image" onclick="if (confirm('Are you sure you want to remove this image?')){select_row({{image.id}}); return true;}else {return false;}">
+                            <button type="submit" class="btn btn-default" id="id_btn_remove_image" name="btn_remove_image" onclick="if ({{image.get_count_segments}} > 0) {alert('The image has segments. Try delete them before remove the image.');return false;} else {if (confirm('Are you sure you want to remove this image?')){select_row({{image.id}}); return true;}else {return false;}}">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </button>
                         </td>  
