@@ -13,6 +13,7 @@ from settings import BASE_DIR
 import os
 import PIL
 import traceback
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -149,7 +150,7 @@ class SegmentImage(TemplateView):
 
 class EditImage(TemplateView):
     template_name='details_image.html'
-    header = 'Details Image'
+    header = 'Image details'
 
     def get(self,request):
         self.id_image = ''

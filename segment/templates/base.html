@@ -13,6 +13,7 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript" src="/static/bootstrap_3.1.1/js/bootstrap.min.js"></script>
 
+
     {% block header %}{% endblock %}
 
     <title>{% block title %}{{header}}{% endblock %}</title>
@@ -22,13 +23,31 @@
 <body>
   <div class="container">
     <div class="header">
-        <div class="row">
-            <div class="col-xs-4 col-md-6">
-            <h1>{% block header_left%}{{header}}{% endblock %}</h1>
-            </div>
-        </div>
+
+        {% block botonera %}
+            <!--Botonera -->
+            <nav class="navbar navbar-default" role="navigation">
+              <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                  <a class="navbar-brand">{{header}}</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                  {% block botonera_links%}
+
+                  {% endblock %}
+                  <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/login/">Login</a></li>
+                  </ul>
+                </div><!-- /.navbar-collapse -->
+              </div><!-- /.container-fluid -->
+            </nav>
+            <br/><br/>
+        {% endblock %}
     </div>
-    <hr>
+
     {% block content %}{% endblock %}
   </div>
 

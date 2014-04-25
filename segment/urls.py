@@ -2,16 +2,28 @@ from django.conf.urls import patterns, include, url
 from segment.views import home
 from segment.views import LImages, SegmentImage,EditImage,EditSegment
 from django.contrib import admin
+from django.contrib.auth.views import login
+from django.contrib.auth.views import logout_then_login
+from django.contrib.auth.decorators import login_required
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'segment.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
-    url(r'^$', home, name='home'),
-    url(r'^limages/',LImages.as_view(),name='limages' ),
-    url(r'^segment_image/',SegmentImage.as_view(),name='segment_image' ),
-    url(r'^edit_image/',EditImage.as_view(),name='edit_image' ),
-    url(r'^edit_segment/',EditSegment.as_view(),name='edit_segment' ),
+    url(r'^$', login_required(home,login_url='/login/'), name='home'),
+    url(r'^limages/',login_required(LImages.as_view(),login_url='/login/'),name='limages' ),
+    url(r'^segment_image/',login_required(SegmentImage.as_view(),login_url='/login/'),name='segment_image' ),
+    url(r'^edit_image/',login_required(EditImage.as_view(),login_url='/login/'),name='edit_image' ),
+    url(r'^edit_segment/',login_required(EditSegment.as_view(),login_url='/login/'),name='edit_segment' ),
     url(r'^admin/', include(admin.site.urls)),
+
+
+
+    url(r'^login/$', 'django.contrib.auth.views.login',{'template_name': 'login.html'}),
+
+    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login',{'login_url': '/login/'}),
+
+
 )
