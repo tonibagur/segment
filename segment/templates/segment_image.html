@@ -138,12 +138,6 @@
         });
     </script>
 
-    <style>
-        canvas {
-            border:1px solid #428bca;
-            display: inline-block;
-        }
-    </style>
 {%endblock%}
 
 {%block content %}
@@ -162,7 +156,7 @@
     </button>
     <br/><br/>
     <div id="id_div_canvas">
-        <canvas id="canvas"></canvas>
+        <canvas id="canvas" class="segmentation"></canvas>
     </div>
     <br/>
 
@@ -198,10 +192,10 @@
             </table>
         </div>
     {% endif %}
-
+    
     <hr>
-    <div>
-        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_GenerateImages">Generate Images</button>
+    <div class="row right">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal_GenerateImages">Generate Images</button>
         <a href="/limages/" class="btn btn-default" role="button">Back</a>
     </div>
     <br/><br/><br/><br/><br/><br/>
@@ -214,11 +208,6 @@
 {% include "modal_segment_image.html" with form_segment=form_segment %}
 
 {% include "modal_generate_images.html" with form_generate_images=form_generate_images %}
-
-
-
-
-
 
 
 

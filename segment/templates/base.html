@@ -12,6 +12,7 @@
     <link type="text/css" href="/static/bootstrap_3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript" src="/static/bootstrap_3.1.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css?{% now "U" %}" />
 
 
     {% block header %}{% endblock %}
@@ -39,12 +40,16 @@
 
                   {% endblock %}
                   <ul class="nav navbar-nav navbar-right">
-                    <li><a href="/login/">Login</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="/logout/?next=/"> {{ user.username }} (Logout)</a></li>
+                    {% else %}
+                        <li><a href="/login/?next=/">Login</a></li>
+                    {% endif %}
                   </ul>
                 </div><!-- /.navbar-collapse -->
               </div><!-- /.container-fluid -->
             </nav>
-            <br/><br/>
+            <br/>
         {% endblock %}
     </div>
 

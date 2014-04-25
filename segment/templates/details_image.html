@@ -19,51 +19,55 @@
 {%endblock%}
 
 {%block content %}
-
-<form role="form" id="id_form_edit_image" name="form_edit_image" action='/edit_image/' method="POST" enctype="multipart/form-data">
-{% csrf_token %}
+<div class="col-md-6 col-md-offset-2 col-sm-8 col-sm-offset-2 square">
+    <form role="form" id="id_form_edit_image" name="form_edit_image" action='/edit_image/' method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
 
           <input type="hidden" id="id_id" name="id" value="{{id_image}}"/>
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="id_name">Name</label>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-9">
                     {{form_image.name | add_class:"form-control" | attr:"required:True" }}
                 </div>
             </div>
             <br/>
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="id_image_type">Image Type</label>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-9">
                     {{form_image.image_type | add_class:"form-control" | attr:"required:True"}}
                 </div>
             </div>
             <br/>
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="id_file">File </label><br/>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-9">
                     {{form_image.filename | attr:"data-filename-placement:inside"}}
                 </div>
             </div>
             <br/>
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="id_file">Image </label><br/>
                 </div>
-                <div class="col-md-10">
-                <img class="media-object" src="/static/{{form_image.filename.value}}" style="max-width:400px;max-height:400px;">
+                <div class="col-md-9">
+                    <img class="media-object" src="/static/{{form_image.filename.value}}" style="max-width:400px;max-height:400px;">
+                </div>
             </div>
             <br/>
             <hr>
-            <a href="/limages/" class="btn btn-default" role="button">Back</a>
-            <input id="id_btn_save_image"" name="btn_save_image" class="btn btn-primary" type="submit" value="Save"/>
+            <div class="row right">
+                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Back"/>
+                <input id="id_btn_save_image"" name="btn_save_image" class="btn btn-primary" type="submit" value="Save"/>
+            </div>
   
-</form>
+    </form>
+</div>
 
 {% endblock %}
 

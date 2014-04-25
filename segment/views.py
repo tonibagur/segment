@@ -169,12 +169,15 @@ class EditImage(TemplateView):
 
     def post(self,request):
         id_image=''
-        if 'id' in request.POST and 'btn_save_image' in request.POST:
+        if 'id' in request.POST:
             id_image = request.POST['id']
             image = Image.objects.get(id=id_image)
-            form_image = ImageForm(request.POST,request.FILES, instance=image) 
-            if form_image.is_valid():
-                form_image.save()          
+            if 'btn_save_image' in request.POST:
+                form_image = ImageForm(request.POST,request.FILES, instance=image) 
+                if form_image.is_valid():
+                    form_image.save()       
+            if 'btn_return' in request.POST:   
+                return HttpResponseRedirect('/limages/')  
         return HttpResponseRedirect('/edit_image/?id='+id_image) 
 
 class EditSegment(TemplateView):
