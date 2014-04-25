@@ -22,7 +22,7 @@ class SegmentForm(ModelForm):
            image_type_filter = kwargs['instance'].image.image_type.id
            self.fields['tags'].queryset = Tag.objects.filter(image_type=image_type_filter)
 
-class GenerateImageForm(forms.Form):
+class GenerateImagesForm(forms.Form):
     image_type = forms.ModelChoiceField(queryset=ImageType.objects.all())
     tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all())
 

@@ -19,7 +19,7 @@ class Image(models.Model):
     name = models.CharField(max_length=50)
     filename = models.ImageField(upload_to='uploads/')
     image_type = models.ForeignKey(ImageType) 
-    parent_image = models.ForeignKey('self', null=True)   
+    parent_segment = models.ForeignKey('Segment', related_name='parent_segment', blank=True, null=True)   
 
     def __unicode__(self):
         return self.name

@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from models import Image, ImageType, Segment,Tag
-from segment.forms import ImageForm,SegmentForm,GenerateImageForm
+from segment.forms import ImageForm,SegmentForm,GenerateImagesForm
 from settings import BASE_DIR
 import os
 import PIL
@@ -93,7 +93,7 @@ class SegmentImage(TemplateView):
             new_segment = Segment(image=image)
             context['form_segment'] = SegmentForm(instance=new_segment)
             context['segments'] = Segment.objects.filter(image_id=self.id_image)
-            context['form_generate_image'] = GenerateImageForm()
+            context['form_generate_image'] = GenerateImagesForm()
             context['zoom'] = self.zoom
         return context
 
@@ -128,7 +128,16 @@ class SegmentImage(TemplateView):
             elif 'btn_generate_images' in request.POST:
                 form_generate_images = GenerateImagesForm(request.POST)
                 if form_generate_images.is_valid():
-                    pass
+                    tags = request.POST['tags']
+                    segments = Segment.objects.filter(tags=tags,image_id=id_image)
+                    for segment in segments:
+                        image = Image()
+                        image.name = segment.filename.split('/')[2].split('.jpg')[0]
+                        image.filename = segment.filename
+                        image.image_type_id = request.POST['image_type']
+                        image.parent_segment_id = segment.id
+                        image.save()
+                    
             elif 'btn_remove_segment' in request.POST:
                 id_segment = request.POST['selected_row']
                 segment = Segment.objects.get(id = id_segment)
