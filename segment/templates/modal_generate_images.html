@@ -13,6 +13,8 @@
       {% csrf_token %}
           <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
           <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
+          <input type="hidden" id="id_draw_segments" name="draw_segments" value="{{draw_segments}}"/>
+
           <div class="modal-body">
             <div class="form-group">
                 <label for="id_image_type">Image Type</label>

@@ -42,10 +42,19 @@
                 canvas.height=imageObj.height*{{zoom}};
                 ctx.scale({{zoom}}, {{zoom}});
                 ctx.drawImage(imageObj, 0, 0);
+                {% if draw_segments %}
+                    {% for segment in segments %}
+                        ctx.fillStyle="#000000";
+                        ctx.fillRect({{segment.x1}}, {{segment.y1}}, {{segment.x2}}-{{segment.x1}}, {{segment.y2}}-{{segment.y1}});
+                    {%endfor%} 
+                {% endif %}
             };
             imageObj.src = '/static/{{form.filename.value}}';
             ctx.lineWidth = 1;
+             
+                
             
+           
             canvasOffset = $("#canvas").offset();
             offsetX = canvasOffset.left;
             offsetY = canvasOffset.top;
@@ -105,27 +114,27 @@
             }
 
             function handleMouseMove(e) {
-                    e.preventDefault();
-		            var mouseX = parseInt(get_clientX(e) - offsetX + $(document).scrollLeft());
-		            var mouseY = parseInt(get_clientY(e) - offsetY + $(document).scrollTop());	
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);		
-                    ctx.drawImage(imageObj, 0, 0);
-	                ctx.beginPath();
-                    ctx.moveTo(0,mouseY/{{zoom}});
-                    ctx.lineTo(canvas.width/{{zoom}},mouseY/{{zoom}});
-                    ctx.moveTo(mouseX/{{zoom}},0);
-                    ctx.lineTo(mouseX/{{zoom}},canvas.height/{{zoom}});           
-                    if (isDrawing) {					
-		                ctx.rect(startX/{{zoom}}, startY/{{zoom}}, (mouseX - startX)/{{zoom}}, (mouseY - startY)/{{zoom}});	
-	                }	
-		            ctx.stroke();	
+                e.preventDefault();
+	            var mouseX = parseInt(get_clientX(e) - offsetX + $(document).scrollLeft());
+	            var mouseY = parseInt(get_clientY(e) - offsetY + $(document).scrollTop());	
+                ctx.clearRect(0, 0, canvas.width, canvas.height);		
+                ctx.drawImage(imageObj, 0, 0);
+                ctx.beginPath();
+                ctx.moveTo(0,mouseY/{{zoom}});
+                ctx.lineTo(canvas.width/{{zoom}},mouseY/{{zoom}});
+                ctx.moveTo(mouseX/{{zoom}},0);
+                ctx.lineTo(mouseX/{{zoom}},canvas.height/{{zoom}});     
+                if (isDrawing) {					
+	                ctx.rect(startX/{{zoom}}, startY/{{zoom}}, (mouseX - startX)/{{zoom}}, (mouseY - startY)/{{zoom}});	
+                }	
+	            ctx.stroke();
 
             }
 
             function handleMouseDown(e) {
                 e.preventDefault();
 	            canvas.style.cursor = "crosshair";		
-	            isDrawing = true
+	            isDrawing = true;
 	            startX = parseInt(get_clientX(e) - offsetX + $(document).scrollLeft());
 	            startY = parseInt(get_clientY(e) - offsetY + $(document).scrollTop());
             }
@@ -133,8 +142,14 @@
             function handleMouseOut(e) {
                 e.preventDefault();
                 ctx.clearRect(0, 0, canvas.width, canvas.height);		
-                ctx.drawImage(imageObj, 0, 0);
+                ctx.drawImage(imageObj, 0, 0); 
+                {% if draw_segments %} 
+                    {% for segment in segments %}
+                        ctx.fillRect({{segment.x1}}, {{segment.y1}}, {{segment.x2}}-{{segment.x1}}, {{segment.y2}}-{{segment.y1}});
+                    {%endfor%}
+                {% endif %}
             }
+
         });
     </script>
 
@@ -147,6 +162,7 @@
     <input type="hidden" id="id_selected_row" name="selected_row" value=""/>   
     <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
     <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
+    <input type="hidden" id="id_draw_segments" name="draw_segments" value="{{draw_segments}}"/>
 
     <button type="submit" class="btn btn-default" id="id_btn_zoom_in" name="btn_zoom_in">
         <span class="glyphicon glyphicon-zoom-in"></span>
@@ -154,6 +170,17 @@
     <button type="submit" class="btn btn-default" id="id_btn_zoom_out" name="btn_zoom_out">
         <span class="glyphicon glyphicon-zoom-out"></span>
     </button>
+    {% if segments %}
+        {% if draw_segments %}
+            <a role="button" class="btn btn-default" href="/segment_image/?id={{id_image}}&zoom={{zoom}}&draw_segments=False">
+                <span class="glyphicon glyphicon-picture"></span>
+            </a>
+        {% else %}
+            <a role="button" class="btn btn-default" href="/segment_image/?id={{id_image}}&zoom={{zoom}}&draw_segments=True">
+                <span class="glyphicon glyphicon-th-large"></span>
+            </a>
+        {% endif %}
+    {% endif %}
     <br/><br/>
     <div id="id_div_canvas">
         <canvas id="canvas" class="segmentation"></canvas>

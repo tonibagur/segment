@@ -73,14 +73,16 @@ class SegmentImage(TemplateView):
     template_name='segment_image.html'
     header = 'Segment Image'
 
-
     def get(self,request):
         self.id_image = ''
         self.zoom = 1
+        self.draw_segments = False
         if 'id' in request.GET:
             self.id_image = int(request.GET['id'])
             if 'zoom' in request.GET:
                 self.zoom = request.GET['zoom'] or 1
+            if 'draw_segments' in request.GET and request.GET['draw_segments'] == 'True':
+                self.draw_segments=True
         return super(SegmentImage, self).get(request)
 
     def get_context_data(self, **kwargs):
@@ -95,6 +97,7 @@ class SegmentImage(TemplateView):
             context['segments'] = Segment.objects.filter(image_id=self.id_image)
             context['form_generate_image'] = GenerateImagesForm()
             context['zoom'] = self.zoom
+            context['draw_segments'] = self.draw_segments
         return context
 
     def post(self,request):
@@ -102,8 +105,11 @@ class SegmentImage(TemplateView):
         if 'image' in request.POST:
             id_image = request.POST['image']
             path_segments = BASE_DIR+'/segment/static/uploads/segments/'
+            draw_segments='false'
             if 'zoom' in request.POST:
                 zoom = float(request.POST['zoom'])
+            if 'draw_segments' in request.POST:
+                draw_segments = request.POST['draw_segments']
             if 'btn_create_segment' in request.POST:
                 form_segment = SegmentForm(request.POST) 
                 if form_segment.is_valid():
@@ -149,12 +155,12 @@ class SegmentImage(TemplateView):
             elif 'btn_zoom_in' in request.POST:
                 if zoom < 5:
                     zoom = zoom+0.2
-                return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom))
+                return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom)+'&draw_segments='+str(draw_segments))
             elif 'btn_zoom_out' in request.POST:
                 if zoom > 0.2:
                     zoom = zoom-0.2
-                return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom))
-        return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom)) 
+                return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom)+'&draw_segments='+str(draw_segments))
+        return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom)+'&draw_segments='+str(draw_segments)) 
 
 
 class EditImage(TemplateView):
