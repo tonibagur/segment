@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load widget_tweaks%}    
+
+
+{% block header%}  
+<title>{% block title %}Login{% endblock %}</title>
+
+{%endblock%}
+
+{% block botonera %}{% endblock %}
+
+
+{%block content %}
+    <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 square_login">
+        <h2>Login</h2>
+        <hr>
+        {% if next %}
+            <form class="login" method="post" action="/accounts/login/?next={{next}}">
+        {%else%}
+            <form class="login" action="/accounts/login/" method="post" >
+        {%endif%}
+            {% csrf_token %}
+            <div {% if form.errors.username %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+              <span class="input-group-addon glyphicon glyphicon-user"></span>
+              {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
+            </div>
+            <div>&nbsp;</div>
+            <div {% if form.errors.password %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+              <span class="input-group-addon glyphicon glyphicon-lock"></span>
+              {{form.password | add_class:"form-control" | attr:"placeholder:Password"}}
+            </div>
+            <div>&nbsp;</div>
+            <div ><input class="btn btn-primary" type="submit" value="Login" /></div>
+        </form>
+        <hr>
+        <a href="/register">Not registered yet?</a><br/>
+       <!-- <a href="/accounts/password_reset">Forget your Password?</a>-->
+    </div> 
+
+</div>
+
+{% endblock %}

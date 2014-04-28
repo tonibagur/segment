@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load widget_tweaks%}    
+
+
+{% block header%}  
+<title>{% block title %}Register{% endblock %}</title>
+
+{%endblock%}
+
+{% block botonera %}{% endblock %}
+
+
+{%block content %}
+    <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 square_login">
+        <h2>Register</h2>
+        <hr>
+
+    <form class="login" action="/register/" method="post" >
+            {% csrf_token %}
+            <div {% if form.errors.username %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+              <span class="input-group-addon glyphicon glyphicon-user"></span>
+              {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
+            </div>
+            <div>&nbsp;</div>
+            <div {% if form.errors.password1 %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+              <span class="input-group-addon glyphicon glyphicon-lock"></span>
+              {{form.password1 | add_class:"form-control" | attr:"placeholder:Password"}}
+            </div>
+            <div>&nbsp;</div>
+            <div {% if form.errors.password2 %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+              <span class="input-group-addon glyphicon glyphicon-lock"></span>
+              {{form.password2 | add_class:"form-control" | attr:"placeholder:Confirm Password"}}
+            </div>
+            <div>&nbsp;</div>
+            <div ><input class="btn btn-primary" type="submit" value="Register" /></div>
+
+        </form>
+        <hr>
+        Already Signed Up? Click <a href="/accounts/login">Sign In</a> to login your account.<br/>
+    </div> 
+
+</div>
+
+{% endblock %}
