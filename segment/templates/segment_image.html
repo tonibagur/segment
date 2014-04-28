@@ -163,6 +163,7 @@
     <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
     <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
     <input type="hidden" id="id_draw_segments" name="draw_segments" value="{{draw_segments}}"/>
+    <input type="hidden" id="id_image_type" name="image_type" value="{{image_type}}"/>
 
     <button type="submit" class="btn btn-default" id="id_btn_zoom_in" name="btn_zoom_in">
         <span class="glyphicon glyphicon-zoom-in"></span>
@@ -223,7 +224,7 @@
     <hr>
     <div class="row right">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal_GenerateImages">Generate Images</button>
-        <a href="/limages/" class="btn btn-default" role="button">Back</a>
+        <button type="submit" class="btn btn-default" id="id_btn_return" name="btn_return">Back</button>
     </div>
     <br/><br/><br/><br/><br/><br/>
 

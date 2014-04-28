@@ -17,10 +17,10 @@
                     <label for="id_name">Coord. 1</label>
                 </div>
                 <div class="col-md-4">
-                    {{form_segment.x1 | add_class:"form-control" | attr:"disabled:disabled"}}
+                    {{form_segment.x1 | add_class:"form-control" | attr:"readonly:readonly"}}
                 </div>
                 <div class="col-md-4">
-                    {{form_segment.y1 | add_class:"form-control" | attr:"disabled:disabled" }}
+                    {{form_segment.y1 | add_class:"form-control" | attr:"readonly:readonly" }}
                 </div>
             </div>
             <br/>
@@ -29,10 +29,10 @@
                     <label for="id_name">Coord. 2</label>
                 </div>
                 <div class="col-md-4">
-                    {{form_segment.x2 | add_class:"form-control" | attr:"disabled:disabled" }}
+                    {{form_segment.x2 | add_class:"form-control" | attr:"readonly:readonly" }}
                 </div>
                 <div class="col-md-4">
-                    {{form_segment.y2 | add_class:"form-control" | attr:"disabled:disabled" }}
+                    {{form_segment.y2 | add_class:"form-control" | attr:"readonly:readonly" }}
                 </div>
             </div>
 
@@ -66,8 +66,8 @@
             <br/><br/><br/><br/><br/>
             <hr>
             <div class="row right">
-                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Back"/>
                 <input id="id_btn_save_segment"" name="btn_save_segment" class="btn btn-primary" type="submit" value="Save"/>
+                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Back"/>
             </div>
             <br/><br/><br/>
   

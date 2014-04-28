@@ -24,6 +24,7 @@
     {% csrf_token %}
 
           <input type="hidden" id="id_id" name="id" value="{{id_image}}"/>
+          <input type="hidden" id="id_image_type" name="image_type" value="{{image_type}}"/>
             <div class="row">
                 <div class="col-md-3">
                     <label for="id_name">Name</label>
@@ -62,8 +63,8 @@
             <br/>
             <hr>
             <div class="row right">
-                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Back"/>
                 <input id="id_btn_save_image"" name="btn_save_image" class="btn btn-primary" type="submit" value="Save"/>
+                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Back"/>
             </div>
             <br/><br/><br/>
   
