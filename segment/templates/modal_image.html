@@ -22,7 +22,7 @@
             </div>
             <div class="form-group">
                 <label for="id_file">File </label><br/>
-                {{form_image.filename | attr:"data-filename-placement:inside" | attr:"required:True"}}
+                 {% include "file_field.html" with default_value=form_image.filename.value input_name='filename' required='required'%}
             </div>
           </div>
           <div class="modal-footer">

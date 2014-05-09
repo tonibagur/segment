@@ -1,0 +1,32 @@
+<style>
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 999px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+</style>
+
+
+<div class="input-group">
+    <input class="form-control" disabled="disabled" id="id_filename" maxlength="255" name="filename" value="{% if default_value %}{{default_value}}{%endif%}" type="text">
+    <span class="input-group-btn">
+        <span class="btn btn-default btn-file">
+        <span class="glyphicon glyphicon-folder-open"></span>
+            <input id="id_{{input_name}}" type="file" name="{{input_name}}" onchange="document.getElementById('id_filename').value=($(this).val());" {%if required%}required="required"{%endif%}>
+        </span>
+    </span>	
+</div>

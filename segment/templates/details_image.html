@@ -2,7 +2,6 @@
 {% load widget_tweaks%}
 
 {% block header%}  
-    <script type="text/javascript" src="/static/bootstrap.file-input.js"></script>
 
     <script type="text/javascript">
     
@@ -10,10 +9,6 @@
             document.getElementById('id_selected_row').value = id;
         }
 
-        $( document ).ready(function() {
-            $('input[type=file]').bootstrapFileInput();
-            $('.file-inputs').bootstrapFileInput();
-        });
     </script>
 
 {%endblock%}
@@ -48,7 +43,7 @@
                     <label for="id_file">File </label><br/>
                 </div>
                 <div class="col-md-9">
-                    {{form_image.filename | attr:"data-filename-placement:inside"}}
+                    {% include "file_field.html" with default_value=form_image.filename.value input_name='filename'%}
                 </div>
             </div>
             <br/>
@@ -60,6 +55,7 @@
                     <img class="media-object" src="/static/{{form_image.filename.value}}" style="max-width:400px;max-height:400px;">
                 </div>
             </div>
+
             <br/>
             <hr>
             <div class="row right">

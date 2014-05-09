@@ -2,7 +2,6 @@
 {% load widget_tweaks%}
 
 {% block header%}  
-    <script type="text/javascript" src="/static/bootstrap.file-input.js"></script>
 
     <script type="text/javascript">
     
@@ -10,10 +9,6 @@
             document.getElementById('id_selected_row').value = id;
         }
 
-        $( document ).ready(function() {
-            $('input[type=file]').bootstrapFileInput();
-            $('.file-inputs').bootstrapFileInput();
-        });
     </script>
 
 {%endblock%}

@@ -99,3 +99,8 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = BASE_DIR+'/segment'+STATIC_URL
 
+
+LOGIN_REDIRECT_URL = '/'
+
+
+
