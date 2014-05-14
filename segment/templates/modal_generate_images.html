@@ -16,13 +16,15 @@
           <input type="hidden" id="id_draw_segments" name="draw_segments" value="{{draw_segments}}"/>
 
           <div class="modal-body">
+            <p>You are converting all selected segments by tags into trainning set's images.</p>
+            <div>&nbsp;</div>
             <div class="form-group">
-                <label for="id_image_type">Image Type</label>
-                {{form_generate_image.image_type | add_class:"form-control" | attr:"required:True" }}
+                <label for="id_tags">Tags</label>
+                {{form_generate_image.tags | add_class:"form-control" | attr:"required:True" | attr:"size:15"}}
             </div>
             <div class="form-group">
-                <label for="id_tags">Image Type</label>
-                {{form_generate_image.tags | add_class:"form-control" | attr:"required:True"}}
+                <label for="id_image_type">Trainning set</label>
+                {{form_generate_image.image_type | add_class:"form-control" | attr:"required:True" }}
             </div>
           </div>
           <div class="modal-footer">

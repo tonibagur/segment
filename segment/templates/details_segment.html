@@ -6,43 +6,24 @@
 {%endblock%}
 
 {%block content %}
+<ol class="breadcrumb">
+  <li><a href="/limages/">Trainning set</a></li>
+  <li><a href="/segment_image/?id={{form_segment.image.value}}">Segment Image</a></li>
+  <li class="active">Edit Segment</li>
+</ol>
 <div class="col-md-6 col-md-offset-2 col-sm-8 col-sm-offset-2 square">
     <form role="form" id="id_form_edit_segment" name="form_edit_segment" action='/edit_segment/' method="POST">
     {% csrf_token %}
 
           <input type="hidden" id="id_id" name="id" value="{{id_segment}}"/>
           <input type="hidden" id="id_image" name="image" value="{{form_segment.image.value}}"/>
-            <div class="row">
-                <div class="col-md-3">
-                    <label for="id_name">Coord. 1</label>
-                </div>
-                <div class="col-md-4">
-                    {{form_segment.x1 | add_class:"form-control" | attr:"readonly:readonly"}}
-                </div>
-                <div class="col-md-4">
-                    {{form_segment.y1 | add_class:"form-control" | attr:"readonly:readonly" }}
-                </div>
-            </div>
-            <br/>
-            <div class="row">
-                <div class="col-md-3">
-                    <label for="id_name">Coord. 2</label>
-                </div>
-                <div class="col-md-4">
-                    {{form_segment.x2 | add_class:"form-control" | attr:"readonly:readonly" }}
-                </div>
-                <div class="col-md-4">
-                    {{form_segment.y2 | add_class:"form-control" | attr:"readonly:readonly" }}
-                </div>
-            </div>
-
             <br/>
             <div class="row">
                 <div class="col-md-3">
                     <label for="id_filename">Filename</label>
                 </div>
                 <div class="col-md-8">
-                    {{form_segment.filename | add_class:"form-control" | attr:"required:True" }}
+                    {{form_segment.filename | add_class:"form-control" | attr:"readonly:readonly" }}
                 </div>
             </div>
             <br/>
@@ -52,7 +33,7 @@
                     <label for="id_tags">Tags</label>
                 </div>
                 <div class="col-md-8">
-                    {{form_segment.tags | add_class:"form-control" | attr:"required:True" }}
+                    {{form_segment.tags | add_class:"form-control" | attr:"required:True" | attr:"size:15" }}
                 </div>
             </div>
             <br/>
@@ -67,7 +48,7 @@
             <hr>
             <div class="row right">
                 <input id="id_btn_save_segment"" name="btn_save_segment" class="btn btn-primary" type="submit" value="Save"/>
-                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Back"/>
+                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Return"/>
             </div>
             <br/><br/><br/>
   

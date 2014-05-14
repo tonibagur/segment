@@ -1,43 +1,126 @@
 {% load widget_tweaks%}
+<script>
 
+    function add_tag(new_tag,alert_invalid) {
+        var tagpattern = new RegExp("^[A-Za-z0-9 ]+$");
+        if (!tagpattern.test(new_tag)) {
+            if (alert_invalid) {
+                alert("Invalid data in new tag field.");
+            }
+            return;
+        }
+        var tags = document.getElementById("id_tags");
+        if (tags.length > 0) {
+            tags.value = tags.value + "\n";
+        }       
+        var tagOption = new Option(new_tag, "new_tag_"+new_tag);
+        tags.appendChild(tagOption);
+        tagOption.selected=true;
+        document.getElementById('id_custom_tag').value = "";
+        refresh_input_tags();
+    }
+
+    function refresh_input_tags() {
+        var tags = document.getElementById("id_tags");
+        var input_tags = document.getElementById("id_input_tags");
+        var value = "";
+        var cont=0;
+        for (var i = 0; i < tags.length; i++) {
+             if (tags.options[i].selected) {
+                if (cont != 0) {
+                    value += ',';
+                }
+                value = value + tags.options[i].text;
+                cont++;
+            }
+        }
+        input_tags.value = value;
+    }
+
+    function refresh_multiselector() {
+        var tags_selector = document.getElementById("id_tags");
+        var input_tags = document.getElementById("id_input_tags").value;
+        input_tags = input_tags.replace(' ','');
+        var list = input_tags.split(',');
+        //Eliminem tags repetits de l'imput tag
+        list = list.filter(function(elem, index, self) {
+            return index == self.indexOf(elem);
+        });
+        //Deseleccionam/eliminem els tags borrats desde input tag
+        trobat = false;
+        for (var i = 0; i < tags_selector.length; i++) {        
+            trobat = false;
+            for (var j=0; j < list.length && !trobat; j++) {
+                if (list[j] == tags_selector.options[i].text) {
+                    trobat = true;
+                }
+            }
+            if(trobat == false) {
+                tags_selector.options[i].selected = false;
+                if (tags_selector.options[i].value.contains('new_tag_')) {
+                    tags_selector.options[i].remove();
+                }
+            }
+        }
+        //Seleccionam/afegim tags introduïts a input tag
+        for (var j=0; j < list.length; j++) {
+            trobat = false;
+            for (var i = 0; i < tags_selector.length && !trobat; i++) {
+                if (list[j] == tags_selector.options[i].text) {
+                    trobat = true;
+                    if (!tags_selector.options[i].selected) {
+                        tags_selector.options[i].selected = true;
+                    }
+                }
+            }
+            if(trobat == false) {
+                alert_invalid = false;
+                add_tag(list[j], alert_invalid);
+            }
+        }
+        
+    }
+
+</script>
 <!-- Modal -->
 <div class="modal fade" id="myModal_Segment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">Segment</h4>
+        <h4 class="modal-title" id="myModalLabel">New Segment</h4>
       </div>
       <form role="form" id="id_form_create_segment" name="form_create_segment" action='/segment_image/' method="POST">
       {% csrf_token %}
           <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
           <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
+            {{form_segment.x1}}
+            {{form_segment.y1}}
+            {{form_segment.x2}}
+            {{form_segment.y2}}
           <div class="modal-body">
             <div class="form-group">
-                <label for="id_name">Coord. (x1,y1)</label>   
+                <label for="id_name">New tag</label>   
                 <div class="row">
                     <div class="col-md-6">
-                        {{form_segment.x1 | add_class:"form-control" | attr:"required:True" }}
+                        <input class="form-control" id="id_custom_tag" value="" type="text"/>
                     </div>
                     <div class="col-md-6">
-                        {{form_segment.y1 | add_class:"form-control" | attr:"required:True" }}
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="id_name">Coord. (x2,y2)</label>   
-                <div class="row">
-                    <div class="col-md-6">
-                        {{form_segment.x2 | add_class:"form-control" | attr:"required:True" }}
-                    </div>
-                    <div class="col-md-6">
-                        {{form_segment.y2 | add_class:"form-control" | attr:"required:True" }}
+                        <button type="button" class="btn btn-default" onclick="add_tag(document.getElementById('id_custom_tag').value,true);" title="Add"><span class="glyphicon glyphicon-plus"></span></button>
                     </div>                    
                 </div>
             </div>
             <div class="form-group">
-                <label for="id_tags">Tags </label><br/>
-                {{form_segment.tags | add_class:"form-control" | attr:"required:True" }}
+                <label for="id_tags">Available Tags </label><br/>
+                {{form_segment.tags | add_class:"form-control" | attr:"required:True" | attr:"size:15" | attr:"onchange:refresh_input_tags()"}}
+            </div>
+            <div class="form-group">
+                <label for="id_name">Tags</label>   
+                <div class="row">
+                    <div class="col-md-12">
+                        <input class="form-control" id="id_input_tags" value="" type="text" onkeyup="refresh_multiselector();" onchange="refresh_multiselector();" onkeyup="refresh_multiselector();"/>
+                    </div>                   
+                </div>
             </div>
           </div>
           <div class="modal-footer">

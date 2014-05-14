@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'segment',
     'south',
     'widget_tweaks',
+    'request',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -56,6 +57,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'request.middleware.RequestMiddleware',
 )
 
 ROOT_URLCONF = 'segment.urls'

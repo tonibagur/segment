@@ -14,12 +14,16 @@
 {%endblock%}
 
 {%block content %}
+<ol class="breadcrumb">
+  <li><a href="/limages/">Trainning set</a></li>
+  <li class="active">Edit Image</li>
+</ol>
 <div class="col-md-6 col-md-offset-2 col-sm-8 col-sm-offset-2 square">
     <form role="form" id="id_form_edit_image" name="form_edit_image" action='/edit_image/' method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
           <input type="hidden" id="id_id" name="id" value="{{id_image}}"/>
-          <input type="hidden" id="id_image_type" name="image_type" value="{{image_type}}"/>
+
             <div class="row">
                 <div class="col-md-3">
                     <label for="id_name">Name</label>
@@ -31,7 +35,7 @@
             <br/>
             <div class="row">
                 <div class="col-md-3">
-                    <label for="id_image_type">Image Type</label>
+                    <label for="id_image_type">Trainning set</label>
                 </div>
                 <div class="col-md-9">
                     {{form_image.image_type | add_class:"form-control" | attr:"required:True"}}
@@ -60,7 +64,7 @@
             <hr>
             <div class="row right">
                 <input id="id_btn_save_image"" name="btn_save_image" class="btn btn-primary" type="submit" value="Save"/>
-                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Back"/>
+                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Return"/>
             </div>
             <br/><br/><br/>
   

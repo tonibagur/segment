@@ -7,13 +7,19 @@ import random
 reload(sys)
 sys.setdefaultencoding("utf-8")
 from settings import BASE_DIR
+from django.contrib.auth.models import User
 
 
 class ImageType(models.Model):
     name = models.CharField(max_length=50)
+    user = models.ForeignKey(User)
+    folder = models.CharField(max_length=50,blank=True)
 
     def __unicode__(self):
         return self.name
+
+    def get_count_images(self):
+        return len(Image.objects.filter(image_type=self)) 
 
 
 class Tag(models.Model):
@@ -32,9 +38,12 @@ class Segment(models.Model):
     tags = models.ManyToManyField(Tag,blank=True)
     filename = models.CharField(max_length=200,blank=True)
 
+def upload_to(instance, filename):
+    return 'uploads/%s/%s/%s' % (instance.image_type.user.id,instance.image_type.folder, filename)
+
 class Image(models.Model):
     name = models.CharField(max_length=50)
-    filename = models.ImageField(upload_to='uploads/')
+    filename = models.ImageField(upload_to=upload_to)
     image_type = models.ForeignKey(ImageType) 
     parent_segment = models.ForeignKey('Segment', related_name='parent_segment', blank=True, null=True)    
 
@@ -43,6 +52,7 @@ class Image(models.Model):
 
     def get_count_segments(self):
         return len(Segment.objects.filter(image=self)) 
+
 
 
     

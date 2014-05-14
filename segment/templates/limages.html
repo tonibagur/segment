@@ -17,12 +17,9 @@
 {% block botonera_links%}
     <ul class="nav navbar-nav">
      {% for type in image_types%}
-        <li {% if image_type_sel == type.id%}class="active"{%endif%}><a href="/limages/?image_type={{type.id}}">{{type.name}}</a></li>
+        <li ><a href="#{{type.name}}">{{type.name}} ({{type.get_count_images}})</a></li>
      {% endfor %}        
     </ul>
-    <div class="navbar-form navbar-left">
-        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_CreateImage">Add Image</button>
-    </div>
 
 {% endblock %}
 {%block content %}
@@ -30,35 +27,44 @@
 <form role="form" id="id_form_limages" name="form_limages" action='/limages/' method="POST" enctype="multipart/form-data">
 {% csrf_token %}
     <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
-    <input type="hidden" id="id_image_type_sel" name="image_type_sel" value="{{image_type_sel}}"/>
-
-    {% if images%}
+    <div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Trainning set <span class="caret"></span></button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a data-toggle="modal" data-target="#myModal_CreateImageType"><span class="glyphicon glyphicon-plus"></span>  Add</a></li>
+            <li><a data-toggle="modal" data-target="#myModal_DeleteImageType"><span class="glyphicon glyphicon-trash"></span>  Delete</a></li>
+          </ul>
+        </div>
+        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_CreateImage" title="Add Image">New Image</button>
+    </div>
+    <br/>
+    {% if images_by_type%}
         <div class="table-responsive">
             <table class="table">
-                <tr>
-                    <th>Name</th>
-                    <th>Filename</th>
-                    <th>Image Type</th>
-                    <th>Image</th>
-                    <th>Segments</th>
-                    <th></th>
-                </tr>
-                {% for image in images %}
+                {% for type in images_by_type %}
+                    <tr><th colspan=5><div id="{{type.image_type}}">{{type.image_type}}</div></th></tr>
+                    <tr class="active">
+                        <td>Name</td>
+                        <td>Image</td>
+                        <td>Segments</td>
+                        <td></td>
+                    </tr>
+                    {% for image in type.rows %}
                     <tr>
+                        
                         <td>{{image.name}}</td>
-                        <td>{{image.filename}}</td>
-                        <td>{{image.image_type}}</td> 
                         <td><img class="media-object" src="/static/{{image.filename}}" style="max-width:70px;max-height:70px;"></td> 
                         <td>{{image.get_count_segments}}</td>
-                        <td>
-                            <a href="/edit_image/?id={{image.id}}&image_type={{image_type_sel}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-pencil"></span></a>
+                        <td align="right">
+                            <a href="/edit_image/?id={{image.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-pencil"></span></a>
                     
-                            <a href="/segment_image/?id={{image.id}}&image_type={{image_type_sel}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-picture"></span></a>
+                            <a href="/segment_image/?id={{image.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-screenshot"></span></a>
                             <button type="submit" class="btn btn-default" id="id_btn_remove_image" name="btn_remove_image" onclick="if ({{image.get_count_segments}} > 0) {alert('The image has segments. Try delete them before remove the image.');return false;} else {if (confirm('Are you sure you want to remove this image?')){select_row({{image.id}}); return true;}else {return false;}}">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </button>
                         </td>  
                     <tr/>
+                    {%endfor%}
                 {% endfor%}
             </table>
         </div>
@@ -66,6 +72,58 @@
 </form>
 
     {% include "modal_image.html" with form_image=form_image id_modal="CreateImage" %}
+
+<!-- Modal Create image type-->
+<div class="modal fade" id="myModal_CreateImageType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel2">Trainning set</h4>
+      </div>
+      <form role="form" id="id_form_create_image_type" name="form_create_image_type" action='/limages/' method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+          <div class="modal-body">
+            <div class="form-group">
+                <label for="id_name">Name</label>
+                <input class="form-control" id="id_name_image_type" maxlength="50" name="name_image_type" required="True" type="text">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <input id="id_btn_create_image_type" name="btn_create_image_type" class="btn btn-primary" type="submit" value="Create"/>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Delete image type-->
+<div class="modal fade" id="myModal_DeleteImageType" tabindex="1" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel3">Trainning set</h4>
+      </div>
+      <form role="form" id="id_form_delete_image_type" name="form_delete_image_type" action='/limages/' method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+          <div class="modal-body">
+            <div class="form-group">
+                <label for="id_name">Name</label>
+                {{form_image.image_type | add_class:"form-control" | attr:"required:True"}}
+            </div>
+            <br/>
+            <p><font style="color:#D43F3A">**</font> You must know you will remove the trainning set with all their tags, images and image's segments.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <input id="id_btn_delete_image_type" name="btn_delete_image_type" class="btn btn-danger" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this trainning set?')"/>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
 

@@ -14,6 +14,12 @@ import os
 import PIL
 import traceback
 from django.contrib.auth.decorators import login_required
+from collections import OrderedDict
+import random
+import string
+import zipfile
+import StringIO
+
 
 
 
@@ -28,45 +34,84 @@ def home(request):
 class LImages(ListView):
     model = Image #implies -> queryset = models.Car.objects.all()
     template_name = 'limages.html' #optional (this is the default name)
-    context_object_name = "images" #default is object_list
+    context_object_name = "images_by_type" #default is object_list
     paginate_by = 50 #and that's it !!
     base_url= '/limages/'
     view_name = 'LImages'
-    header = 'Images list'
+    header = 'Trainning set'
 
     def get(self,request):
         self.id_image = ''
-        self.image_type_sel = 1 #Default
-        if 'image_type' in request.GET and request.GET['image_type']:
-            self.image_type_sel = int(request.GET['image_type'])
-        self.queryset = Image.objects.filter(image_type_id=self.image_type_sel)
+        self.image_types = ImageType.objects.filter(user_id=request.user.id).order_by('name')
+        images = Image.objects.filter(image_type=self.image_types).order_by('image_type__name')
+        images_in_type = []
+        type = ''
+        group = {}
+        for image in images: 
+            image_type = ImageType.objects.get(id=image.image_type_id)
+            if type != image_type.name:
+                if type != '':
+                    images_in_type.append(group)
+                group = {}
+                type = image_type.name
+                group = {'image_type':type,'rows':[]}
+            group['rows'].append(image)
+        images_in_type.append(group)
+        self.queryset = images_in_type
         return super(LImages, self).get(request)
  
     def get_context_data(self, **kwargs):
         context = super(LImages, self).get_context_data(**kwargs)
         context['header'] = self.header
         context['form_image'] = ImageForm()
-        context['image_types'] = ImageType.objects.all()
-        context['image_type_sel'] = self.image_type_sel
+        context['image_types'] = self.image_types
         return context
 
     def post(self,request):
-        image_type = ''
-        if 'image_type_sel' in request.POST:
-            image_type = request.POST['image_type_sel']
         if 'btn_create_image' in request.POST:
             form_image = ImageForm(request.POST,request.FILES) 
             if form_image.is_valid():
                 form_image.save()
         if 'btn_remove_image' in request.POST:
             id_image = request.POST['selected_row']
-            image = Image.objects.get(id = id_image)
-            if image:
-                filepath = BASE_DIR+'/segment/static/'+str(image.filename)
-                if os.path.isfile(filepath):
-                    os.remove(filepath)
-                image.delete()
-        return HttpResponseRedirect('/limages/?image_type='+str(image_type)) 
+            self.delete_image(id_image)
+        if 'btn_create_image_type' in request.POST:
+            new_image_type = request.POST['name_image_type']
+            folder_random_name = self.get_random_name()
+            it = ImageType()
+            it.name = new_image_type
+            it.user = request.user
+            it.folder = folder_random_name
+            it.save()
+        if 'btn_delete_image_type' in request.POST:
+            image_type = request.POST['image_type']
+            it = ImageType.objects.get(id=image_type)
+            images = Image.objects.filter(image_type=it)
+            for image in images:
+                segments = Segment.objects.filter(image=image)
+                for segment in segments:
+                    segment.delete()
+                self.delete_image(image.id)
+            tags = Tag.objects.filter(image_type=it)
+            for tag in tags:
+                tag.delete()
+            it.delete()
+        return HttpResponseRedirect('/limages/') 
+
+    def delete_image(self, id_image):
+        image = Image.objects.get(id = id_image)
+        if image:
+            filepath = BASE_DIR+'/segment/static/'+str(image.filename)
+            if os.path.isfile(filepath):
+                os.remove(filepath)
+            image.delete()
+
+    def get_random_name(self):
+        name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
+        image_types = ImageType.objects.filter(folder=name)
+        if len(image_types) > 0:
+            get_random_name
+        return name
 
 
 class SegmentImage(TemplateView):
@@ -74,7 +119,7 @@ class SegmentImage(TemplateView):
     header = 'Segment Image'
 
     def get(self,request):
-        self.id_image = self.image_type= ''
+        self.id_image= ''
         self.zoom = 1
         self.draw_segments = False
         if 'id' in request.GET:
@@ -83,8 +128,6 @@ class SegmentImage(TemplateView):
                 self.zoom = request.GET['zoom'] or 1
             if 'draw_segments' in request.GET:
                 self.draw_segments=request.GET['draw_segments'] in ['True']
-            if 'image_type' in request.GET:
-                self.image_type=request.GET['image_type']
         return super(SegmentImage, self).get(request)
 
     def get_context_data(self, **kwargs):
@@ -96,36 +139,59 @@ class SegmentImage(TemplateView):
             context['form'] = ImageForm(instance=image)
             new_segment = Segment(image=image)
             context['form_segment'] = SegmentForm(instance=new_segment)
-            context['segments'] = Segment.objects.filter(image_id=self.id_image)
+            segments = Segment.objects.filter(image_id=self.id_image)
+            context['segments'] = segments
             context['form_generate_image'] = GenerateImagesForm()
             context['zoom'] = self.zoom
             context['draw_segments'] = self.draw_segments
-            context['image_type'] = self.image_type
+            if self.draw_segments:
+                tags = Tag.objects.filter(image_type=image.image_type)
+                tags = {}
+                seg_tags = Tag.objects.filter(image_type=image.image_type)
+                for tag in seg_tags:
+                    tags[tag.name]=[]
+                    for segment in segments:
+                        tags_aux = Tag.objects.filter(segment=segment)
+                        if tag in tags_aux:
+                            tags[tag.name].append(segment)
+                tags=OrderedDict(sorted(tags.items(), key=lambda t: t[0]))
+                context['tags'] = tags
         return context
 
     def post(self,request):
         id_image=zoom=''
         if 'image' in request.POST:
             id_image = request.POST['image']
-            path_segments = BASE_DIR+'/segment/static/uploads/segments/'
+            image = Image.objects.get(id=id_image)
+            path_segments = BASE_DIR+'/segment/static/uploads/%s/%s/segments/'%(request.user.id,image.image_type.folder)
+            if not os.path.exists(path_segments):
+                os.makedirs(path_segments)
             draw_segments='false'
             if 'zoom' in request.POST:
                 zoom = float(request.POST['zoom'])
             if 'draw_segments' in request.POST:
                 draw_segments = request.POST['draw_segments']
             if 'btn_return' in request.POST:
-                if 'image_type' in request.POST:
-                    image_type = request.POST['image_type']
-                    return HttpResponseRedirect('/limages/?image_type='+image_type) 
                 return HttpResponseRedirect('/limages/') 
             if 'btn_create_segment' in request.POST:
-                form_segment = SegmentForm(request.POST) 
+                #Afegim tags nous:
+                post = request.POST.copy()
+                tags = post.getlist('tags')
+                ntag = 0
+                for key in tags:
+                    if 'new_tag_' in key:
+                        tag_name = key.replace('new_tag_','')
+                        t = Tag(name=tag_name,image_type=image.image_type)
+                        t.save()
+                        post.getlist('tags')[ntag] = t.id
+                    ntag+=1
+                form_segment = SegmentForm(post)     
                 if form_segment.is_valid():
                     try:   
                         #TODO primer crear imatge i dsp guardar segment, no a l'inreves
                         segment = form_segment.save()   #commit=False  
                         filename = 'segment_'+str(id_image)+"_"+str(segment.id)+'.jpg'
-                        segment.filename = 'uploads/segments/'+filename
+                        segment.filename = 'uploads/%s/%s/segments/%s'%(request.user.id,image.image_type.folder,filename)
                         segment.save() 
                         x1=int(request.POST['x1'])
                         y1=int(request.POST['y1'])
@@ -146,7 +212,7 @@ class SegmentImage(TemplateView):
                     segments = Segment.objects.filter(tags=tags,image_id=id_image)
                     for segment in segments:
                         image = Image()
-                        image.name = segment.filename.split('/')[2].split('.jpg')[0]
+                        image.name = segment.filename.split('/')[4].split('.jpg')[0]
                         image.filename = segment.filename
                         image.image_type_id = request.POST['image_type']
                         image.parent_segment_id = segment.id
@@ -173,14 +239,12 @@ class SegmentImage(TemplateView):
 
 class EditImage(TemplateView):
     template_name='details_image.html'
-    header = 'Image details'
+    header = 'Edit Image'
 
     def get(self,request):
-        self.id_image = self.image_type = ''
+        self.id_image = ''
         if 'id' in request.GET:
             self.id_image = int(request.GET['id'])
-            if 'image_type' in request.GET:
-                self.image_type=request.GET['image_type']
         return super(EditImage, self).get(request)
 
     def get_context_data(self, **kwargs):
@@ -190,7 +254,6 @@ class EditImage(TemplateView):
             context['id_image'] = self.id_image
             image = Image.objects.get(id=self.id_image)
             context['form_image'] = ImageForm(instance=image)
-            context['image_type'] = self.image_type
         return context
 
     def post(self,request):
@@ -203,15 +266,12 @@ class EditImage(TemplateView):
                 if form_image.is_valid():
                     form_image.save()       
             if 'btn_return' in request.POST:
-                if 'image_type' in request.POST:
-                    image_type = request.POST['image_type']
-                    return HttpResponseRedirect('/limages/?image_type='+image_type) 
                 return HttpResponseRedirect('/limages/')  
         return HttpResponseRedirect('/edit_image/?id='+id_image) 
 
 class EditSegment(TemplateView):
     template_name='details_segment.html'
-    header = 'Details Segment'
+    header = 'Edit Segment'
 
     def get(self,request):
         self.id_segment = ''
@@ -243,6 +303,58 @@ class EditSegment(TemplateView):
                 return HttpResponseRedirect('/segment_image/?id='+str(segment.image_id))        
         return HttpResponseRedirect('/edit_segment/?id='+id_segment) 
 
+
+def get_matlab_file(request):
+    if 'image' in request.GET:
+        id_image = request.GET['id_image']
+        #TODO TBC
+        '''temp_path = settings.STATIC_ROOT + filename
+        wb = Workbook(StringIO.StringIO())
+        ws = wb.create_sheet()
+        for row in rows:
+            new_row=[]
+            for col in row:
+                    new_row.append(col)
+            ws.append(new_row)
+        wb.save(temp_path)
+        s=StringIO.StringIO()
+        s.write(open(temp_path).read())
+        s.seek(0)
+        response = HttpResponse(s,content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="%s"' %(filename,)
+        os.remove(temp_path)
+        return response'''
+    return HttpResponseRedirect('/')
+
+def zipdir(path, zip):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            zip.write(os.path.join(root, file))
+
+def get_zip_file(request):
+    if 'image' in request.GET:
+        image = request.GET['image']
+        tags = request.GET.getlist('tags')
+        zip_subdir = "segments_%s" % image
+        zip_filename = "%s.zip" % zip_subdir
+        s = StringIO.StringIO()
+        zf = zipfile.ZipFile(s, "w")
+        for tag in tags:
+            filenames = []
+            id_tag = int(tag)
+            t = Tag.objects.get(id=id_tag)
+            segments = Segment.objects.filter(tags=t)
+            for segment in segments:
+                filenames.append(BASE_DIR+'/segment/static/'+segment.filename) 
+            zip_path = zip_subdir+'/'+t.name
+            for fpath in filenames:
+                fdir, fname = os.path.split(fpath)
+                zip_path2 = os.path.join(zip_path, fname)
+                zf.write(fpath, zip_path2)
+        zf.close()   
+        response = HttpResponse(s.getvalue(), mimetype = "application/x-zip-compressed")
+        response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+        return response
 
 
 

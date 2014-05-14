@@ -22,6 +22,12 @@
               {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
             </div>
             <div>&nbsp;</div>
+            <div {% if form.errors.email %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+              <span class="input-group-addon glyphicon glyphicon-envelope"></span>
+              {{form.email | add_class:"form-control" | attr:"placeholder:Email"}}
+            </div>
+
+            <div>&nbsp;</div>
             <div {% if form.errors.password1 %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
               <span class="input-group-addon glyphicon glyphicon-lock"></span>
               {{form.password1 | add_class:"form-control" | attr:"placeholder:Password"}}
