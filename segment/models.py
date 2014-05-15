@@ -21,6 +21,9 @@ class ImageType(models.Model):
     def get_count_images(self):
         return len(Image.objects.filter(image_type=self)) 
 
+    def get_tags(self):
+        return Tag.objects.filter(image_type=self)
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)

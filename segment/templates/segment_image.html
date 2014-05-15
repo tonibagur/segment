@@ -278,9 +278,9 @@
 
 {% include "modal_generate_images.html" with form_generate_images=form_generate_images zoom=zoom id_image=id_image%}
 
-{% include "modal_download_segments.html" with name="Matlab" get_url="/get_matlab_file/" %}
+{% include "modal_download_segments.html" with name="Matlab" image_types=image_types get_url="/get_matlab_file/" %}
 
-{% include "modal_download_segments.html" with name="Zip" get_url="/get_zip_file/" %}
+{% include "modal_download_segments.html" with name="Zip" image_types=image_types get_url="/get_zip_file/" %}
 
 
 {% endblock %}

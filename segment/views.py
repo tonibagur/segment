@@ -65,6 +65,7 @@ class LImages(ListView):
         context['header'] = self.header
         context['form_image'] = ImageForm()
         context['image_types'] = self.image_types
+        context['download_tags'] = Tag.objects.all().order_by('name')
         return context
 
     def post(self,request):
@@ -136,6 +137,7 @@ class SegmentImage(TemplateView):
         if self.id_image:
             context['id_image'] = self.id_image
             image = Image.objects.get(id=self.id_image)
+            context['download_tags'] = Tag.objects.filter(image_type=image.image_type).order_by('name')
             context['form'] = ImageForm(instance=image)
             new_segment = Segment(image=image)
             context['form_segment'] = SegmentForm(instance=new_segment)
@@ -307,6 +309,7 @@ class EditSegment(TemplateView):
 def get_matlab_file(request):
     if 'image' in request.GET:
         id_image = request.GET['id_image']
+        color = request.GET['image_format']
         #TODO TBC
         '''temp_path = settings.STATIC_ROOT + filename
         wb = Workbook(StringIO.StringIO())
@@ -326,16 +329,24 @@ def get_matlab_file(request):
         return response'''
     return HttpResponseRedirect('/')
 
-def zipdir(path, zip):
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            zip.write(os.path.join(root, file))
+
+
 
 def get_zip_file(request):
-    if 'image' in request.GET:
-        image = request.GET['image']
+    if 'tags' in request.GET:
+        image = ''
+        identify=''
+        it =''
+        if 'image' in request.GET:
+            image = request.GET['image']
+            identify="image_"+str(image)
+        if 'image_type' in request.GET:
+            image_type_id = request.GET['image_type']
+            it = ImageType.objects.get(id=image_type_id)
+            identify="trainning_"+str(image_type_id)
+        color = request.GET['image_format']
         tags = request.GET.getlist('tags')
-        zip_subdir = "segments_%s" % image
+        zip_subdir = "segments_%s" % identify
         zip_filename = "%s.zip" % zip_subdir
         s = StringIO.StringIO()
         zf = zipfile.ZipFile(s, "w")
@@ -343,9 +354,12 @@ def get_zip_file(request):
             filenames = []
             id_tag = int(tag)
             t = Tag.objects.get(id=id_tag)
-            segments = Segment.objects.filter(tags=t)
+            if image:
+                segments = Segment.objects.filter(tags=t,image=image)
+            elif it:
+                segments = Segment.objects.filter(tags=t,image__image_type=it)
             for segment in segments:
-                filenames.append(BASE_DIR+'/segment/static/'+segment.filename) 
+                filenames.append(BASE_DIR+'/segment/static/'+segment.filename)
             zip_path = zip_subdir+'/'+t.name
             for fpath in filenames:
                 fdir, fname = os.path.split(fpath)
@@ -355,6 +369,8 @@ def get_zip_file(request):
         response = HttpResponse(s.getvalue(), mimetype = "application/x-zip-compressed")
         response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
         return response
+
+
 
 
 

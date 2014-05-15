@@ -9,6 +9,7 @@
             document.getElementById('id_selected_row').value = id;
         }
 
+
     </script>
 
 {%endblock%}
@@ -31,8 +32,11 @@
         <div class="btn-group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Trainning set <span class="caret"></span></button>
           <ul class="dropdown-menu" role="menu">
-            <li><a data-toggle="modal" data-target="#myModal_CreateImageType"><span class="glyphicon glyphicon-plus"></span>  Add</a></li>
+            <li><a data-toggle="modal" data-target="#myModal_CreateImageType"><span class="glyphicon glyphicon-plus"></span>  New</a></li>
             <li><a data-toggle="modal" data-target="#myModal_DeleteImageType"><span class="glyphicon glyphicon-trash"></span>  Delete</a></li>
+            <li class="divider"></li>
+            <li><a data-toggle="modal" data-target="#myModal_Download_Matlab"><span class="glyphicon glyphicon-download"></span>  Download (Matlab)</a></li>
+            <li><a data-toggle="modal" data-target="#myModal_Download_Zip"><span class="glyphicon glyphicon-download"></span>  Download(.zip)</a></li>
           </ul>
         </div>
         <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal_CreateImage" title="Add Image">New Image</button>
@@ -72,6 +76,11 @@
 </form>
 
     {% include "modal_image.html" with form_image=form_image id_modal="CreateImage" %}
+
+    {% include "modal_download_segments.html" with name="Matlab" image_types=image_types get_url="/get_matlab_file/" %}
+
+    {% include "modal_download_segments.html" with name="Zip" image_types=image_types get_url="/get_zip_file/" %}
+
 
 <!-- Modal Create image type-->
 <div class="modal fade" id="myModal_CreateImageType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true">

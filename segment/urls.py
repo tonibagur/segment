@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from segment.views import home
 from segment.views import LImages, SegmentImage,EditImage,EditSegment,get_matlab_file,get_zip_file
+from segment import views
 from django.contrib import admin
 from django.contrib.auth.views import login
 from django.contrib.auth.views import logout_then_login
