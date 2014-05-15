@@ -13,6 +13,7 @@ from django.contrib.auth.models import User
 class ImageType(models.Model):
     name = models.CharField(max_length=50)
     user = models.ForeignKey(User)
+    users_shared = models.ManyToManyField(User,related_name='users_shared', blank=True, null=True)
     folder = models.CharField(max_length=50,blank=True)
 
     def __unicode__(self):

@@ -7,10 +7,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 
 class ImageForm(ModelForm):
-    image_type = forms.ModelChoiceField(queryset=ImageType.objects.all().order_by('name'))
     class Meta:
         model = Image
         fields = ['name', 'filename', 'image_type']
+
+    def __init__(self, user=None, *args, **kwargs):
+        self.user = user
+        super(ImageForm, self).__init__(*args, **kwargs)
+        self.fields['image_type'].queryset = ImageType.objects.filter(users_shared=self.user).order_by('name')
+
+
 
 class SegmentForm(ModelForm):
     x1 = forms.FloatField(widget=forms.HiddenInput())
@@ -32,6 +38,12 @@ class GenerateImagesForm(forms.Form):
     image_type = forms.ModelChoiceField(queryset=ImageType.objects.all())
     tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all().order_by('name'))
 
+    def __init__(self, user=None, image=None,*args, **kwargs):
+        self.user = user
+        super(GenerateImagesForm, self).__init__(*args, **kwargs)
+        self.fields['image_type'].queryset = ImageType.objects.filter(users_shared=self.user).order_by('name')
+        image_type_filter = ImageType.objects.filter(id=image.image_type.id).order_by('name')
+        self.fields['tags'].queryset = Tag.objects.filter(image_type=image_type_filter).order_by('name')
 
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(required=True)

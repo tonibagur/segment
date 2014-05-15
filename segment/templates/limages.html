@@ -27,12 +27,14 @@
 
 <form role="form" id="id_form_limages" name="form_limages" action='/limages/' method="POST" enctype="multipart/form-data">
 {% csrf_token %}
+    <h2><font style="color:#357EBD">Honey</font><font>Box</font> <small>beta</small></h2>
     <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
     <div>
         <div class="btn-group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Trainning set <span class="caret"></span></button>
           <ul class="dropdown-menu" role="menu">
             <li><a data-toggle="modal" data-target="#myModal_CreateImageType"><span class="glyphicon glyphicon-plus"></span>  New</a></li>
+            <li><a data-toggle="modal" data-target="#myModal_ShareImageType"><span class="glyphicon glyphicon-share"></span>  Share</a></li>
             <li><a data-toggle="modal" data-target="#myModal_DeleteImageType"><span class="glyphicon glyphicon-trash"></span>  Delete</a></li>
             <li class="divider"></li>
             <li><a data-toggle="modal" data-target="#myModal_Download_Matlab"><span class="glyphicon glyphicon-download"></span>  Download (Matlab)</a></li>
@@ -88,7 +90,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel2">Trainning set</h4>
+        <h4 class="modal-title" id="myModalLabel2">New Trainning set</h4>
       </div>
       <form role="form" id="id_form_create_image_type" name="form_create_image_type" action='/limages/' method="POST" enctype="multipart/form-data">
       {% csrf_token %}
@@ -107,20 +109,61 @@
   </div>
 </div>
 
+<!-- Modal Share image type-->
+<div class="modal fade" id="myModal_ShareImageType" tabindex="1" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel3">Share Trainning set</h4>
+      </div>
+      <form role="form" id="id_form_share_image_type" name="form_share_image_type" action='/limages/' method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+          <div class="modal-body">
+            <div class="form-group">
+                <label for="id_name">Name</label>
+                <select class="form-control" id="id_image_type" name="image_type" required="True">
+                    <option value="" selected="selected">---------</option>
+                    {% for image_type in image_types %}
+                        <option value="{{image_type.id}}">{{image_type.name}}</option>
+                    {% endfor%}
+                </select>
+            </div>
+            <br/>
+            <div class="form-group">
+                <label for="id_name">Username</label>
+                <input type="text" id="id_username" name="username" data-provide="typeahead" data-source="{{users}}" autocomplete="off" data-items="4" required="True" class="form-control"/>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <input id="id_btn_share_image_type" name="btn_share_image_type" class="btn btn-primary" type="submit" value="Share"/>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
 <!-- Modal Delete image type-->
 <div class="modal fade" id="myModal_DeleteImageType" tabindex="1" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel3">Trainning set</h4>
+        <h4 class="modal-title" id="myModalLabel3">Delete Trainning set</h4>
       </div>
       <form role="form" id="id_form_delete_image_type" name="form_delete_image_type" action='/limages/' method="POST" enctype="multipart/form-data">
       {% csrf_token %}
           <div class="modal-body">
             <div class="form-group">
                 <label for="id_name">Name</label>
-                {{form_image.image_type | add_class:"form-control" | attr:"required:True"}}
+                <select class="form-control" id="id_image_type" name="image_type" required="True">
+                    <option value="" selected="selected">---------</option>
+                    {% for image_type in image_types %}
+                        <option value="{{image_type.id}}">{{image_type.name}}</option>
+                    {% endfor%}
+                </select>
             </div>
             <br/>
             <p><font style="color:#D43F3A">**</font> You must know you will remove the trainning set with all their tags, images and image's segments.</p>

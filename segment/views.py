@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from models import Image, ImageType, Segment,Tag
 from segment.forms import ImageForm,SegmentForm,GenerateImagesForm
+from django.contrib.auth.models import User
 from settings import BASE_DIR
 import os
 import PIL
@@ -42,7 +43,8 @@ class LImages(ListView):
 
     def get(self,request):
         self.id_image = ''
-        self.image_types = ImageType.objects.filter(user_id=request.user.id).order_by('name')
+        self.request = request
+        self.image_types = ImageType.objects.filter(users_shared=request.user).order_by('name')
         images = Image.objects.filter(image_type=self.image_types).order_by('image_type__name')
         images_in_type = []
         type = ''
@@ -63,9 +65,15 @@ class LImages(ListView):
     def get_context_data(self, **kwargs):
         context = super(LImages, self).get_context_data(**kwargs)
         context['header'] = self.header
-        context['form_image'] = ImageForm()
+        context['form_image'] = ImageForm(user=self.request.user)
         context['image_types'] = self.image_types
         context['download_tags'] = Tag.objects.all().order_by('name')
+        users = User.objects.all().exclude(id=self.request.user.id).order_by('username')
+        users_list = []
+        for u in users:
+            print u.username
+            users_list.append(u.username)
+        context['users'] = '["'+'","'.join(users_list)+'"]'
         return context
 
     def post(self,request):
@@ -84,19 +92,31 @@ class LImages(ListView):
             it.user = request.user
             it.folder = folder_random_name
             it.save()
+            it.users_shared.add(request.user)
+        if 'btn_share_image_type' in request.POST:
+            image_type = request.POST['image_type']
+            it = ImageType.objects.get(id=image_type)
+            username = request.POST['username']
+            users = User.objects.filter(username=username)
+            if len(users) > 0:
+                user = users[0]
+                it.users_shared.add(user)
         if 'btn_delete_image_type' in request.POST:
             image_type = request.POST['image_type']
             it = ImageType.objects.get(id=image_type)
-            images = Image.objects.filter(image_type=it)
-            for image in images:
-                segments = Segment.objects.filter(image=image)
-                for segment in segments:
-                    segment.delete()
-                self.delete_image(image.id)
-            tags = Tag.objects.filter(image_type=it)
-            for tag in tags:
-                tag.delete()
-            it.delete()
+            if it.user == request.user:
+                images = Image.objects.filter(image_type=it)
+                for image in images:
+                    segments = Segment.objects.filter(image=image)
+                    for segment in segments:
+                        segment.delete()
+                    self.delete_image(image.id)
+                tags = Tag.objects.filter(image_type=it)
+                for tag in tags:
+                    tag.delete()
+                it.delete()
+            else:
+                it.users_shared.remove(request.user)
         return HttpResponseRedirect('/limages/') 
 
     def delete_image(self, id_image):
@@ -121,6 +141,7 @@ class SegmentImage(TemplateView):
 
     def get(self,request):
         self.id_image= ''
+        self.request = request
         self.zoom = 1
         self.draw_segments = False
         if 'id' in request.GET:
@@ -138,12 +159,12 @@ class SegmentImage(TemplateView):
             context['id_image'] = self.id_image
             image = Image.objects.get(id=self.id_image)
             context['download_tags'] = Tag.objects.filter(image_type=image.image_type).order_by('name')
-            context['form'] = ImageForm(instance=image)
+            context['form'] = ImageForm(instance=image,user=self.request.user)
             new_segment = Segment(image=image)
             context['form_segment'] = SegmentForm(instance=new_segment)
             segments = Segment.objects.filter(image_id=self.id_image)
             context['segments'] = segments
-            context['form_generate_image'] = GenerateImagesForm()
+            context['form_generate_image'] = GenerateImagesForm(user=self.request.user,image=image)
             context['zoom'] = self.zoom
             context['draw_segments'] = self.draw_segments
             if self.draw_segments:
