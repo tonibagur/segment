@@ -6,6 +6,19 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 
+
+class ImageTypeForm(ModelForm):
+    folder = forms.CharField(widget=forms.HiddenInput())
+    class Meta:
+        model = ImageType
+        fields = ['name', 'user', 'users_shared','folder']
+
+    #def __init__(self, user=None, *args, **kwargs):
+    #    self.user = user
+    #    super(ImageTypeForm, self).__init__(*args, **kwargs)
+        #self.fields['users_shared'].queryset = User.objects.all().exclude(id=self.user.id).order_by('username')
+
+
 class ImageForm(ModelForm):
     class Meta:
         model = Image
@@ -15,7 +28,6 @@ class ImageForm(ModelForm):
         self.user = user
         super(ImageForm, self).__init__(*args, **kwargs)
         self.fields['image_type'].queryset = ImageType.objects.filter(users_shared=self.user).order_by('name')
-
 
 
 class SegmentForm(ModelForm):

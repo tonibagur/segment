@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from models import Image, ImageType, Segment,Tag
-from segment.forms import ImageForm,SegmentForm,GenerateImagesForm
+from segment.forms import ImageForm,SegmentForm,GenerateImagesForm,ImageTypeForm
 from django.contrib.auth.models import User
 from settings import BASE_DIR
 import os
@@ -56,7 +56,7 @@ class LImages(ListView):
                     images_in_type.append(group)
                 group = {}
                 type = image_type.name
-                group = {'image_type':type,'rows':[]}
+                group = {'image_type':type,'image_type_id':image_type.id,'rows':[]}
             group['rows'].append(image)
         images_in_type.append(group)
         self.queryset = images_in_type
@@ -265,6 +265,7 @@ class EditImage(TemplateView):
     header = 'Edit Image'
 
     def get(self,request):
+        self.request = request
         self.id_image = ''
         if 'id' in request.GET:
             self.id_image = int(request.GET['id'])
@@ -276,7 +277,7 @@ class EditImage(TemplateView):
         if self.id_image:
             context['id_image'] = self.id_image
             image = Image.objects.get(id=self.id_image)
-            context['form_image'] = ImageForm(instance=image)
+            context['form_image'] = ImageForm(instance=image,user=self.request.user)
         return context
 
     def post(self,request):
@@ -326,11 +327,46 @@ class EditSegment(TemplateView):
                 return HttpResponseRedirect('/segment_image/?id='+str(segment.image_id))        
         return HttpResponseRedirect('/edit_segment/?id='+id_segment) 
 
+class EditImageType(TemplateView):
+    template_name='details_imagetype.html'
+    header = 'Edit Trainning set'
+
+    def get(self,request):
+        self.request = request
+        self.id_it = ''
+        if 'id' in request.GET:
+            self.id_it = int(request.GET['id'])
+        return super(EditImageType, self).get(request)
+
+    def get_context_data(self, **kwargs):
+        context = super(EditImageType, self).get_context_data(**kwargs)
+        context['header'] = self.header
+        if self.id_it:
+            context['id_imagetype'] = self.id_it
+            image_type = ImageType.objects.get(id=self.id_it)
+            context['form_imagetype'] = ImageTypeForm(instance=image_type)#,user=self.request.user)
+        return context
+
+    def post(self,request):
+        id_imagetype=''
+        if 'id' in request.POST:
+            id_imagetype = request.POST['id']
+            image_type = ImageType.objects.get(id=id_imagetype)
+            if 'btn_save_imagetype' in request.POST:
+                form_imagetype = ImageTypeForm(request.POST,instance=image_type) 
+                print request.POST
+                if form_imagetype.is_valid():
+                    form_imagetype.save()   
+            if 'btn_return' in request.POST:
+                return HttpResponseRedirect('/limages/')  
+        return HttpResponseRedirect('/edit_imagetype/?id='+str(id_imagetype)) 
 
 def get_matlab_file(request):
     if 'image' in request.GET:
         id_image = request.GET['id_image']
         color = request.GET['image_format']
+        width = request.GET['width']
+        height = request.GET['height']
         #TODO TBC
         '''temp_path = settings.STATIC_ROOT + filename
         wb = Workbook(StringIO.StringIO())
@@ -366,6 +402,8 @@ def get_zip_file(request):
             it = ImageType.objects.get(id=image_type_id)
             identify="trainning_"+str(image_type_id)
         color = request.GET['image_format']
+        width = request.GET['width']
+        height = request.GET['height']
         tags = request.GET.getlist('tags')
         zip_subdir = "segments_%s" % identify
         zip_filename = "%s.zip" % zip_subdir

@@ -12,29 +12,30 @@
 
 {%block content %}
     <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 square_login">
-        <h2>Register</h2>
+        <!--<h2>Register</h2>-->
+        <h1><font style="color:#357EBD">Honey</font><font style="color:black">Box</font> <small style="font-size:13px;">beta</small></a></h1>
         <hr>
 
     <form class="login" action="/register/" method="post" >
             {% csrf_token %}
             <div {% if form.errors.username %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
-              <span class="input-group-addon glyphicon glyphicon-user"></span>
+              <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
               {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
             </div>
             <div>&nbsp;</div>
             <div {% if form.errors.email %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
-              <span class="input-group-addon glyphicon glyphicon-envelope"></span>
+              <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
               {{form.email | add_class:"form-control" | attr:"placeholder:Email"}}
             </div>
 
             <div>&nbsp;</div>
             <div {% if form.errors.password1 %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
-              <span class="input-group-addon glyphicon glyphicon-lock"></span>
+              <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
               {{form.password1 | add_class:"form-control" | attr:"placeholder:Password"}}
             </div>
             <div>&nbsp;</div>
             <div {% if form.errors.password2 %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
-              <span class="input-group-addon glyphicon glyphicon-lock"></span>
+              <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
               {{form.password2 | add_class:"form-control" | attr:"placeholder:Confirm Password"}}
             </div>
             <div>&nbsp;</div>

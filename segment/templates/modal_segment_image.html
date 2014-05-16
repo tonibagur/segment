@@ -1,6 +1,8 @@
 {% load widget_tweaks%}
 <script>
 
+    String.prototype.contains = function(it) { return this.indexOf(it) != -1; };
+
     function add_tag(new_tag,alert_invalid) {
         var tagpattern = new RegExp("^[A-Za-z0-9 ]+$");
         if (!tagpattern.test(new_tag)) {
@@ -10,9 +12,6 @@
             return;
         }
         var tags = document.getElementById("id_tags");
-        if (tags.length > 0) {
-            tags.value = tags.value + "\n";
-        }       
         var tagOption = new Option(new_tag, "new_tag_"+new_tag);
         tags.appendChild(tagOption);
         tagOption.selected=true;
@@ -46,6 +45,7 @@
         list = list.filter(function(elem, index, self) {
             return index == self.indexOf(elem);
         });
+
         //Deseleccionam/eliminem els tags borrats desde input tag
         trobat = false;
         for (var i = 0; i < tags_selector.length; i++) {        

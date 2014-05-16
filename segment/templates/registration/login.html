@@ -12,7 +12,7 @@
 
 {%block content %}
     <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 square_login">
-        <h2>Login</h2>
+        <h1><font style="color:#357EBD">Honey</font><font style="color:black">Box</font> <small style="font-size:13px;">beta</small></a></h1>
         <hr>
         {% if next %}
             <form class="login" method="post" action="/accounts/login/?next={{next}}">
@@ -21,12 +21,12 @@
         {%endif%}
             {% csrf_token %}
             <div {% if form.errors.username %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
-              <span class="input-group-addon glyphicon glyphicon-user"></span>
+              <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
               {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
             </div>
             <div>&nbsp;</div>
             <div {% if form.errors.password %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
-              <span class="input-group-addon glyphicon glyphicon-lock"></span>
+              <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
               {{form.password | add_class:"form-control" | attr:"placeholder:Password"}}
             </div>
             <div>&nbsp;</div>

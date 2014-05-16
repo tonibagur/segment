@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load widget_tweaks%}
+
+{% block header%}  
+
+    <script type="text/javascript">
+    
+        function select_row(id) {
+            document.getElementById('id_selected_row').value = id;
+        }
+
+    </script>
+
+{%endblock%}
+
+{%block content %}
+<ol class="breadcrumb">
+  <li><a href="/limages/">Trainning set</a></li>
+  <li class="active">Edit Image</li>
+</ol>
+<div class="col-md-6 col-md-offset-2 col-sm-8 col-sm-offset-2 square">
+    <form role="form" id="id_form_edit_imagetype" name="form_edit_imagetype" action='/edit_imagetype/' method="POST">
+    {% csrf_token %}
+
+            <input type="hidden" id="id_id" name="id" value="{{id_imagetype}}"/>
+            {{form_imagetype.folder}}
+
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="id_name">Name</label>
+                </div>
+                <div class="col-md-9">
+                    {{form_imagetype.name | add_class:"form-control" | attr:"required:True" }}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="id_image_type">Owner</label>
+                </div>
+                <div class="col-md-9">
+                    {{form_imagetype.user | add_class:"form-control" | attr:"required:True" | attr:"disabled:disabled" }}
+                    <input type="hidden" id="id_user" name="user" value="{{form_imagetype.user.value}}"/>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="id_file">Shared with </label><br/>
+                </div>
+                <div class="col-md-9">
+                    {{form_imagetype.users_shared | add_class:"form-control" | attr:"size:8" | attr:"disabled:disabled"}}
+                </div>
+            </div>
+            <br/>
+
+
+            <br/>
+            <hr>
+            <div class="row right">
+                <input id="id_btn_save_imagetype"" name="btn_save_imagetype" class="btn btn-primary" type="submit" value="Save"/>
+                <input id="id_btn_return" name="btn_return" formnovalidate class="btn btn-default" type="submit" value="Return"/>
+            </div>
+            <br/><br/><br/>
+  
+    </form>
+</div>
+
+{% endblock %}
+
+
+

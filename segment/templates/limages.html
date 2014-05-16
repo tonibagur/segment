@@ -27,13 +27,14 @@
 
 <form role="form" id="id_form_limages" name="form_limages" action='/limages/' method="POST" enctype="multipart/form-data">
 {% csrf_token %}
-    <h2><font style="color:#357EBD">Honey</font><font>Box</font> <small>beta</small></h2>
+    
     <input type="hidden" id="id_selected_row" name="selected_row" value=""/>
     <div>
         <div class="btn-group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Trainning set <span class="caret"></span></button>
           <ul class="dropdown-menu" role="menu">
             <li><a data-toggle="modal" data-target="#myModal_CreateImageType"><span class="glyphicon glyphicon-plus"></span>  New</a></li>
+            <!--<li><a data-toggle="modal" data-target="#myModal_EditImageType"><span class="glyphicon glyphicon-pencil"></span>  Edit</a></li>-->
             <li><a data-toggle="modal" data-target="#myModal_ShareImageType"><span class="glyphicon glyphicon-share"></span>  Share</a></li>
             <li><a data-toggle="modal" data-target="#myModal_DeleteImageType"><span class="glyphicon glyphicon-trash"></span>  Delete</a></li>
             <li class="divider"></li>
@@ -48,7 +49,15 @@
         <div class="table-responsive">
             <table class="table">
                 {% for type in images_by_type %}
-                    <tr><th colspan=5><div id="{{type.image_type}}">{{type.image_type}}</div></th></tr>
+                    <tr><th colspan=5>
+                            <div id="{{type.image_type}}">
+                                {{type.image_type}}
+                                <a href="/edit_imagetype/?id={{type.image_type_id}}" style="float:right;margin-right:15px;">
+                                    <span class="glyphicon glyphicon-pencil" style="color:black"></span>
+                                </a>
+                            </div>
+                        </th>
+                    </tr>
                     <tr class="active">
                         <td>Name</td>
                         <td>Image</td>
