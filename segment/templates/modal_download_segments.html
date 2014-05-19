@@ -41,13 +41,18 @@
 
           <div class="modal-body">
             <div class="form-group">
+                {% if name != "Zip"%}
+                <div class="alert alert-warning"> The .mat file will contain:
+                   <ul> <li> X variable with a row(unrolled version of the image) for every segment(for the color format, the row will be composed as [r g b]) </li>
+                                                 <li> labels variable with the list of tags(ordered as y) exported.</li>
+                                                 <li> y variable: one 0's and 1's row for every image indicated whether a tag is marked or not</li></ul>
+                                                  </div>
+                {% endif %}
                 <label for="id_image_format">Format</label>
                 <select class="form-control" id="id_image_format" name="image_format" required="True">
                     <option value="" selected="selected">---------</option>
                     <option value="gray_scale">Grey Scale</option>
-                    {% if name == "Zip"%}
                         <option value="color">Color</option>
-                    {% endif %}
                     <option value="edges">Edge detection</option>
                 </select>
             </div>
@@ -63,10 +68,10 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <input type="number" id="id_width" name="width" class="form-control" value="20" required="required"/>
+                        <input type="number" id="id_width" name="width" class="form-control" value="{{average_width}}" required="required"/>
                     </div>
                     <div class="col-md-6">
-                        <input type="number" id="id_height" name="height" class="form-control" value="20" required="required"/>
+                        <input type="number" id="id_height" name="height" class="form-control" value="{{average_height}}" required="required"/>
                     </div>
                 </div>
             </div>

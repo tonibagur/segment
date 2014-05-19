@@ -270,12 +270,14 @@
             <table class="table">
                 <tr>
                     <th>Segment Image</th>
+                    <th>Size</th>
                     <th>Tags</th>
                     <th></th>
                 </tr>
                 {%for segment in segments %}
                     <tr>
                         <td><img class="media-object" src="/static/{{segment.filename}}" style="max-width:70px;max-height:50px;"/></td>
+                        <td>{{segment.get_width}} x {{segment.get_height}} px</td>
                         <td>{% for tag in segment.tags.all %}{{tag}},{%endfor%}</td>
                         <td align="right">       
                             <a href="/edit_segment/?id={{segment.id}}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-pencil"></span></a>                    

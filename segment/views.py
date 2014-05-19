@@ -15,6 +15,7 @@ import os
 import PIL
 import SimpleCV
 import oct2py
+import numpy
 import traceback
 from django.contrib.auth.decorators import login_required
 from collections import OrderedDict
@@ -23,6 +24,7 @@ import string
 import zipfile
 import StringIO
 from django.db.models import signals
+
 
 
 
@@ -71,6 +73,8 @@ class LImages(ListView):
         context['form_image'] = ImageForm(user=self.request.user)
         context['image_types'] = self.image_types
         context['download_tags'] = Tag.objects.all().order_by('name')
+        context['average_width'] = 20
+        context['average_height'] = 20
         users = User.objects.all().exclude(id=self.request.user.id).order_by('username')
         users_list = []
         for u in users:
@@ -169,6 +173,15 @@ class SegmentImage(TemplateView):
             context['form_generate_image'] = GenerateImagesForm(user=self.request.user,image=image)
             context['zoom'] = self.zoom
             context['draw_segments'] = self.draw_segments
+            w = h = 0
+            for segment in segments:
+                w += segment.x2-segment.x1
+                h += segment.y2-segment.y1
+            size = len(segments)
+            if size == 0:
+                size = 1
+            context['average_width'] = int(w/size)
+            context['average_height'] = int(h/size)
             if self.draw_segments:
                 tags = Tag.objects.filter(image_type=image.image_type)
                 tags = {}
@@ -378,7 +391,6 @@ def get_matlab_file(request):
             it = ImageType.objects.get(id=image_type_id)
             identify="trainning_"+str(image_type_id)
         color = request.GET['image_format']
-        print "Color",color
         width = request.GET['width']
         height = request.GET['height']
         ids_tags = request.GET.getlist('tags')
@@ -392,19 +404,19 @@ def get_matlab_file(request):
         elif it:
             segments = Segment.objects.filter(image__image_type=it)
         octave=oct2py.Oct2Py()
-        if color=='color':
-            octave.run('y=[];X=[];')
-        else:
-            octave.run('X=[];y=[];')
-        
+        octave.put('labels',[t.name for t in tags])
+        octave.run("addpath('/home/coneptum/segment/octave');")
+        y=[]
+        images=[]
         for segment in segments:
             segment_tags = []
+            l=[]
             for tag in tags:
                 if tag in segment.tags.all():
-                    segment_tags.append({tag.name:1})
+                    l.append(1)
                 else:
-                    segment_tags.append({tag.name:0})
-            print "segment_tags", segment_tags
+                    l.append(0)
+            y.append(l)
             im=PIL.Image.open(BASE_DIR+'/segment/static/'+segment.filename)
             im2=im.resize((int(width),int(height)),PIL.Image.ANTIALIAS)
             route=segment.filename.split('/')
@@ -413,20 +425,18 @@ def get_matlab_file(request):
                 im2=im2.convert('L')
             im2.save(tmp_img,'JPEG')
             if color=='edges':
-                SimpleCV.Image(tmp_img).edges().save(tmp_img) 
-            if color == 'color':
-                octave.run('''i=imread('{0}');i1=i(:,:,1);i2=i(:,:,2);i3=i(:,:,3); '''.format(tmp_img))
-                octave.run(''' Xr=i1(:)';Xg=i2(:)';Xb=i3(:)'; X=[X; Xr Xg Xb] ''')
-            else:
-                octave.run('''i=imread('{0}')(:)'; '''.format(tmp_img))
-                octave.run(''' X=[X;i]; ''')
-  
+                SimpleCV.Image(tmp_img).edges().save(tmp_img)
+            images.append(tmp_img)
+        octave.put('y',numpy.array(y))
+        octave.put('images',images)
+        print images
+        octave.run('X=load_images(images);')
         filemat='{0}/data.mat'.format(temp_folder)
         print "filemat",filemat
         if color=='color':
-            octave.run('''save {0} X y '''.format(filemat))
+            octave.run('''save {0} X y labels '''.format(filemat))
         else:
-            octave.run('''save {0} X y '''.format(filemat))
+            octave.run('''save {0} X y labels'''.format(filemat))
         response = HttpResponse(open(filemat).read(), mimetype = "application/x-matlab")
         response['Content-Disposition'] = 'attachment; filename=%s' % 'data.mat'
         return response

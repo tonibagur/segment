@@ -43,6 +43,12 @@ class Segment(models.Model):
     tags = models.ManyToManyField(Tag,blank=True)
     filename = models.CharField(max_length=200,blank=True)
 
+    def get_width(self):
+        return int(self.x2-self.x1)
+
+    def get_height(self):
+        return int(self.y2-self.y1)
+
 def upload_to(instance, filename):
     return 'uploads/%s/%s/%s' % (instance.image_type.user.id,instance.image_type.folder, filename)
 
