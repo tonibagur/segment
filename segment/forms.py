@@ -11,7 +11,7 @@ class ImageTypeForm(ModelForm):
     folder = forms.CharField(widget=forms.HiddenInput())
     class Meta:
         model = ImageType
-        fields = ['name', 'user', 'users_shared','folder']
+        fields = ['name', 'user','folder']
 
     #def __init__(self, user=None, *args, **kwargs):
     #    self.user = user
@@ -48,14 +48,14 @@ class SegmentForm(ModelForm):
 
 class GenerateImagesForm(forms.Form):
     image_type = forms.ModelChoiceField(queryset=ImageType.objects.all())
-    tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all().order_by('name'))
+    tags_gi = forms.ModelMultipleChoiceField(queryset=Tag.objects.all().order_by('name'))
 
     def __init__(self, user=None, image=None,*args, **kwargs):
         self.user = user
         super(GenerateImagesForm, self).__init__(*args, **kwargs)
         self.fields['image_type'].queryset = ImageType.objects.filter(users_shared=self.user).order_by('name')
         image_type_filter = ImageType.objects.filter(id=image.image_type.id).order_by('name')
-        self.fields['tags'].queryset = Tag.objects.filter(image_type=image_type_filter).order_by('name')
+        self.fields['tags_gi'].queryset = Tag.objects.filter(image_type=image_type_filter).order_by('name')
 
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(required=True)

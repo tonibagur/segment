@@ -13,6 +13,8 @@ from django.contrib.auth.models import User
 from settings import BASE_DIR
 import os
 import PIL
+import SimpleCV
+import oct2py
 import traceback
 from django.contrib.auth.decorators import login_required
 from collections import OrderedDict
@@ -20,6 +22,7 @@ import random
 import string
 import zipfile
 import StringIO
+from django.db.models import signals
 
 
 
@@ -71,14 +74,13 @@ class LImages(ListView):
         users = User.objects.all().exclude(id=self.request.user.id).order_by('username')
         users_list = []
         for u in users:
-            print u.username
             users_list.append(u.username)
         context['users'] = '["'+'","'.join(users_list)+'"]'
         return context
 
     def post(self,request):
         if 'btn_create_image' in request.POST:
-            form_image = ImageForm(request.POST,request.FILES) 
+            form_image = ImageForm(user=request.user,data=request.POST,files=request.FILES) 
             if form_image.is_valid():
                 form_image.save()
         if 'btn_remove_image' in request.POST:
@@ -86,7 +88,7 @@ class LImages(ListView):
             self.delete_image(id_image)
         if 'btn_create_image_type' in request.POST:
             new_image_type = request.POST['name_image_type']
-            folder_random_name = self.get_random_name()
+            folder_random_name = get_random_name()
             it = ImageType()
             it.name = new_image_type
             it.user = request.user
@@ -127,12 +129,12 @@ class LImages(ListView):
                 os.remove(filepath)
             image.delete()
 
-    def get_random_name(self):
-        name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
-        image_types = ImageType.objects.filter(folder=name)
-        if len(image_types) > 0:
-            get_random_name
-        return name
+def get_random_name():
+    name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
+    image_types = ImageType.objects.filter(folder=name)
+    if len(image_types) > 0:
+        get_random_name
+    return name
 
 
 class SegmentImage(TemplateView):
@@ -229,7 +231,7 @@ class SegmentImage(TemplateView):
                     except:
                         traceback.print_exc()
             elif 'btn_generate_images' in request.POST:
-                form_generate_images = GenerateImagesForm(request.POST)
+                form_generate_images = GenerateImagesForm(user=request.user,image=image,data=request.POST)
                 if form_generate_images.is_valid():
                     tags = request.POST['tags']
                     segments = Segment.objects.filter(tags=tags,image_id=id_image)
@@ -357,34 +359,77 @@ class EditImageType(TemplateView):
                 print request.POST
                 if form_imagetype.is_valid():
                     form_imagetype.save()   
+                else:
+                    print "ERROR", str(form_imagetype.errors)
             if 'btn_return' in request.POST:
                 return HttpResponseRedirect('/limages/')  
         return HttpResponseRedirect('/edit_imagetype/?id='+str(id_imagetype)) 
 
 def get_matlab_file(request):
-    if 'image' in request.GET:
-        id_image = request.GET['id_image']
+    if 'tags' in request.GET:
+        image = ''
+        identify=''
+        it =''
+        if 'image' in request.GET:
+            image = request.GET['image']
+            identify="image_"+str(image)
+        if 'image_type' in request.GET:
+            image_type_id = request.GET['image_type']
+            it = ImageType.objects.get(id=image_type_id)
+            identify="trainning_"+str(image_type_id)
         color = request.GET['image_format']
+        print "Color",color
         width = request.GET['width']
         height = request.GET['height']
-        #TODO TBC
-        '''temp_path = settings.STATIC_ROOT + filename
-        wb = Workbook(StringIO.StringIO())
-        ws = wb.create_sheet()
-        for row in rows:
-            new_row=[]
-            for col in row:
-                    new_row.append(col)
-            ws.append(new_row)
-        wb.save(temp_path)
-        s=StringIO.StringIO()
-        s.write(open(temp_path).read())
-        s.seek(0)
-        response = HttpResponse(s,content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="%s"' %(filename,)
-        os.remove(temp_path)
-        return response'''
-    return HttpResponseRedirect('/')
+        ids_tags = request.GET.getlist('tags')
+        tags = Tag.objects.filter(pk__in=ids_tags).order_by('name')
+
+        temp_folder='/tmp/{0}'.format(random.randint(0,10000000))
+        os.popen('mkdir {0}'.format(temp_folder))
+        
+        if image:
+            segments = Segment.objects.filter(image=image)
+        elif it:
+            segments = Segment.objects.filter(image__image_type=it)
+        octave=oct2py.Oct2Py()
+        if color=='color':
+            octave.run('y=[];X=[];')
+        else:
+            octave.run('X=[];y=[];')
+        
+        for segment in segments:
+            segment_tags = []
+            for tag in tags:
+                if tag in segment.tags.all():
+                    segment_tags.append({tag.name:1})
+                else:
+                    segment_tags.append({tag.name:0})
+            print "segment_tags", segment_tags
+            im=PIL.Image.open(BASE_DIR+'/segment/static/'+segment.filename)
+            im2=im.resize((int(width),int(height)),PIL.Image.ANTIALIAS)
+            route=segment.filename.split('/')
+            tmp_img='{0}/{1}'.format(temp_folder,route[len(route)-1])#.replace('jpg','png')
+            if color=='gray_scale':
+                im2=im2.convert('L')
+            im2.save(tmp_img,'JPEG')
+            if color=='edges':
+                SimpleCV.Image(tmp_img).edges().save(tmp_img) 
+            if color == 'color':
+                octave.run('''i=imread('{0}');i1=i(:,:,1);i2=i(:,:,2);i3=i(:,:,3); '''.format(tmp_img))
+                octave.run(''' Xr=i1(:)';Xg=i2(:)';Xb=i3(:)'; X=[X; Xr Xg Xb] ''')
+            else:
+                octave.run('''i=imread('{0}')(:)'; '''.format(tmp_img))
+                octave.run(''' X=[X;i]; ''')
+  
+        filemat='{0}/data.mat'.format(temp_folder)
+        print "filemat",filemat
+        if color=='color':
+            octave.run('''save {0} X y '''.format(filemat))
+        else:
+            octave.run('''save {0} X y '''.format(filemat))
+        response = HttpResponse(open(filemat).read(), mimetype = "application/x-matlab")
+        response['Content-Disposition'] = 'attachment; filename=%s' % 'data.mat'
+        return response
 
 
 
@@ -402,6 +447,7 @@ def get_zip_file(request):
             it = ImageType.objects.get(id=image_type_id)
             identify="trainning_"+str(image_type_id)
         color = request.GET['image_format']
+        print "Color",color
         width = request.GET['width']
         height = request.GET['height']
         tags = request.GET.getlist('tags')
@@ -409,6 +455,8 @@ def get_zip_file(request):
         zip_filename = "%s.zip" % zip_subdir
         s = StringIO.StringIO()
         zf = zipfile.ZipFile(s, "w")
+        temp_folder='/tmp/{0}'.format(random.randint(0,10000000))
+        os.popen('mkdir {0}'.format(temp_folder))
         for tag in tags:
             filenames = []
             id_tag = int(tag)
@@ -423,12 +471,90 @@ def get_zip_file(request):
             for fpath in filenames:
                 fdir, fname = os.path.split(fpath)
                 zip_path2 = os.path.join(zip_path, fname)
-                zf.write(fpath, zip_path2)
+                
+                im=PIL.Image.open(fpath)
+                print "w,h",width,height
+                im2=im.resize((int(width),int(height)),PIL.Image.ANTIALIAS)
+                if color=='gray_scale':
+                    im2=im2.convert('L')
+                route=fpath.split('/')
+                tmp_img='{0}/{1}'.format(temp_folder,route[len(route)-1])#.replace('jpg','png')
+                print "tmp_img",tmp_img
+                im2.save(tmp_img,'JPEG')
+                if color=='edges':
+                    SimpleCV.Image(tmp_img).edges().save(tmp_img) 
+                
+                def_path=fpath
+                
+                zf.write(tmp_img, zip_path2)
         zf.close()   
         response = HttpResponse(s.getvalue(), mimetype = "application/x-zip-compressed")
         response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
         return response
 
+
+def post_create_user(sender, instance, created, **kwargs):
+    print "Post save emited for", instance
+    users = User.objects.filter(username="user_template")
+    if created and len(users) > 0:
+        user_template = users[0]
+        print "user_template", user_template
+        user = instance
+        image_types = ImageType.objects.filter(user=user_template)
+        print "image_types", image_types
+        print 'mkdir {0}{1}'.format(BASE_DIR+'/segment/static/uploads/',str(user_template.id),str(user.id))
+        os.popen('cp -a {0}{1} {0}{2}'.format(BASE_DIR+'/segment/static/uploads/',str(user_template.id),str(user.id)))
+        for image_type in image_types:
+            print "imagetype", image_type
+            #folder_random_name = get_random_name()
+            #print 'mkdir {0}{1}/{2}'.format(BASE_DIR+'/segment/static/uploads/',str(user.id),folder_random_name)
+            #os.popen('mkdir {0}{1}/{2}'.format(BASE_DIR+'/segment/static/uploads/',str(user.id),folder_random_name))
+            #os.popen('mkdir {0}{1}/{2}/segments'.format(BASE_DIR+'/segment/static/uploads/',str(user.id),folder_random_name))
+            #os.popen('mkdir {0}{1}/{2}/segments'.format(BASE_DIR+'/segment/static/uploads/',str(user.id),folder_random_name))
+            it = ImageType()
+            it.name=image_type.name
+            it.user = user
+            it.folder = image_type.folder
+            it.save()
+            it.users_shared.add(user)
+            tags = Tag.objects.filter(image_type=image_type)
+            for tag in tags:
+                t = Tag()
+                t.name = tag.name
+                t.image_type = it
+                t.save()
+            images = Image.objects.filter(image_type=image_type)
+            print "images", images
+            for image in images:
+                i = Image()
+                i.name = image.name
+                i.image_type = it
+                i.filename = str(image.filename).replace('/'+str(user_template.id)+'/','/'+str(user.id)+'/')
+                #print 'cp "{0}{1}" "{2}{3}"'.format(BASE_DIR+'/segment/static/',str(image.filename),BASE_DIR+'/segment/static/' ,str(i.filename))
+                #os.popen('cp "{0}{1}" "{2}{3}"'.format(BASE_DIR+'/segment/static/',str(image.filename),BASE_DIR+'/segment/static/' ,str(i.filename)))
+                i.parent_segment = image.parent_segment
+                i.save()
+                segments = Segment.objects.filter(image=image)
+                print "image id", image.id, "segments", len(segments), segments
+                for segment in segments:
+                    s = Segment()
+                    s.x1 = segment.x1
+                    s.y1 = segment.y1
+                    s.x2 = segment.x2
+                    s.y2 = segment.y2
+                    s.image = i
+                    s.filename = str(segment.filename).replace('/'+str(user_template.id)+'/','/'+str(user.id)+'/')
+                    #print 'cp "{0}{1}" "{2}{3}"'.format(BASE_DIR+'/segment/static/',str(segment.filename),BASE_DIR+'/segment/static/',str(s.filename))
+                    #os.popen('cp "{0}{1}" "{2}{3}"'.format(BASE_DIR+'/segment/static/',str(segment.filename),BASE_DIR+'/segment/static/',str(s.filename)))
+                    s.save()
+                    for tag in segment.tags.all():
+                        tag_new = Tag.objects.filter(image_type=it,name=tag.name)
+                        s.tags.add(tag_new[0])
+            #Copiar carpetes amb imatges
+                
+        
+
+signals.post_save.connect(post_create_user, sender=User)
 
 
 

@@ -9,8 +9,27 @@
             document.getElementById('id_selected_row').value = id;
         }
    
-        function draw_segments2() {
-            alert('2');
+        function select_all_tags_draw() {
+            var select_all_draw = document.getElementById('id_select_all_tags_draw').value;
+            {% for tag, segments in tags.items%}
+                {% if segments %}                   
+                    if(select_all_draw == 'true') {
+                        document.getElementById('id_{{tag}}').checked = true;
+                    }
+                    else {
+                        document.getElementById('id_{{tag}}').checked= false;
+                    }
+                    if (select_all_draw == 'true') {
+                        document.getElementById('id_link_select_all_draw').innerHTML='Deselect all';   
+                        document.getElementById('id_select_all_tags_draw').value = 'false'; 
+                    }
+                    else {
+                        document.getElementById('id_link_select_all_draw').innerHTML = 'Select all';
+                        document.getElementById('id_select_all_tags_draw').value = 'true';
+                    }
+                {% endif%}
+            {% endfor %}
+            init_canvas();
         }
 
         function init_canvas() {
@@ -178,6 +197,7 @@
     <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
     <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
     <input type="hidden" id="id_draw_segments" name="draw_segments" value="{{draw_segments}}"/>
+    <input type="hidden" id="id_select_all_tags_draw" name="select_all_tags_draw" value="false"/>
 
     <ol class="breadcrumb">
       <li><a href="/limages/">Trainning set</a></li>
@@ -209,7 +229,11 @@
     {% if draw_segments and tags%}
         <div>&nbsp;</div>
         <div class="panel panel-default">
-          <div class="panel-heading">Tags</div>
+          <div class="panel-heading">Tags
+                <div style="float:right;">
+                    <a id="id_link_select_all_draw" onclick="select_all_tags_draw();" style="margin-right:15px;">Deselect all</a>
+                </div>
+          </div>
           <div class="panel-body">
             {% for tag, segments in tags.items%}
                 {% if segments %}

@@ -1,6 +1,30 @@
 {% load widget_tweaks%}
 
 
+<script>
+    function select_all_tags_gi() {
+        var select_all_gi = document.getElementById('id_select_all_gi').value;
+        var tags = document.getElementById("id_tags_gi");
+        for (var i = 0; i < tags.length; i++) {           
+            if(select_all_gi == 'true') {
+                tags.options[i].selected = true;
+            }
+            else {
+                tags.options[i].selected = false;
+            }
+        }
+        if (select_all_gi == 'true') {
+            document.getElementById('id_link_select_all_gi').innerHTML='Deselect all';   
+            document.getElementById('id_select_all_gi').value = 'false'; 
+        }
+        else {
+            document.getElementById('id_link_select_all_gi').innerHTML = 'Select all';
+            document.getElementById('id_select_all_gi').value = 'true';
+        }
+    }
+</script>
+
+
 <!-- Modal -->
 <div class="modal fade" id="myModal_GenerateImages" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -14,13 +38,17 @@
           <input type="hidden" id="id_image" name="image" value="{{id_image}}"/>
           <input type="hidden" id="id_zoom" name="zoom" value="{{zoom}}"/>
           <input type="hidden" id="id_draw_segments" name="draw_segments" value="{{draw_segments}}"/>
+          <input type="hidden" id="id_select_all_gi" name="select_all_gi" value="true"/>
 
           <div class="modal-body">
             <p>You are converting all selected segments by tags into trainning set's images.</p>
             <div>&nbsp;</div>
             <div class="form-group">
                 <label for="id_tags">Tags</label>
-                {{form_generate_image.tags | add_class:"form-control" | attr:"required:True" | attr:"size:15"}}
+                <div style="float:right;">
+                    <a id="id_link_select_all_gi" onclick="select_all_tags_gi();" style="margin-right:15px;">Select all</a>
+                </div>
+                {{form_generate_image.tags_gi | add_class:"form-control" | attr:"required:True" | attr:"size:15"}}
             </div>
             <div class="form-group">
                 <label for="id_image_type">Trainning set</label>

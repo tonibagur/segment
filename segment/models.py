@@ -10,6 +10,7 @@ from settings import BASE_DIR
 from django.contrib.auth.models import User
 
 
+
 class ImageType(models.Model):
     name = models.CharField(max_length=50)
     user = models.ForeignKey(User)
@@ -56,6 +57,9 @@ class Image(models.Model):
 
     def get_count_segments(self):
         return len(Segment.objects.filter(image=self)) 
+
+
+
 
 
 
