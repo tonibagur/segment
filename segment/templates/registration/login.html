@@ -20,11 +20,23 @@
             <form class="login" action="/accounts/login/" method="post" >
         {%endif%}
             {% csrf_token %}
+            {% if form.errors.username %}
+                <div class="alert alert-danger alert-dismissable">
+                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                  {{form.errors.username}}
+                </div>
+            {% endif %}
             <div {% if form.errors.username %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
               <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
               {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
             </div>
             <div>&nbsp;</div>
+            {% if form.errors.password %}
+                <div class="alert alert-danger alert-dismissable">
+                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                  {{form.errors.password}}
+                </div>
+            {% endif %}
             <div {% if form.errors.password %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
               <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
               {{form.password | add_class:"form-control" | attr:"placeholder:Password"}}
