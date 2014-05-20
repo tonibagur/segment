@@ -23,7 +23,7 @@ urlpatterns = patterns('',
     url(r'^edit_imagetype/',login_required(views.EditImageType.as_view(),login_url='/accounts/login/'),name='edit_imagetype' ),
     url(r'^get_matlab_file/$',login_required(get_matlab_file,login_url='/login/'),name='get_matlab_file'),
     url(r'^get_zip_file/$',login_required(get_zip_file,login_url='/login/'),name='get_zip_file'),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^coneptum/admin/', include(admin.site.urls)),
 
 
     url('^accounts/', include('django.contrib.auth.urls')),

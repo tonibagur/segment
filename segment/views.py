@@ -212,17 +212,7 @@ class SegmentImage(TemplateView):
             if 'btn_return' in request.POST:
                 return HttpResponseRedirect('/limages/') 
             if 'btn_create_segment' in request.POST:
-                #Afegim tags nous:
-                post = request.POST.copy()
-                tags = post.getlist('tags')
-                ntag = 0
-                for key in tags:
-                    if 'new_tag_' in key:
-                        tag_name = key.replace('new_tag_','')
-                        t = Tag(name=tag_name,image_type=image.image_type)
-                        t.save()
-                        post.getlist('tags')[ntag] = t.id
-                    ntag+=1
+                post = save_new_tags(request,image)
                 form_segment = SegmentForm(post)     
                 if form_segment.is_valid():
                     try:   
@@ -274,6 +264,21 @@ class SegmentImage(TemplateView):
                 return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom)+'&draw_segments='+str(draw_segments))
         return HttpResponseRedirect('/segment_image/?id='+id_image+'&zoom='+str(zoom)+'&draw_segments='+str(draw_segments)) 
 
+
+def save_new_tags(request, image):
+    #Afegim tags nous:
+    post = request.POST.copy()
+    tags = post.getlist('tags')
+    ntag = 0
+    for key in tags:
+        if 'new_tag_' in key:
+            tag_name = key.replace('new_tag_','')
+            t = Tag(name=tag_name,image_type=image.image_type)
+            t.save()
+            post.getlist('tags')[ntag] = t.id
+        ntag+=1
+    return post
+     
 
 class EditImage(TemplateView):
     template_name='details_image.html'
@@ -333,7 +338,8 @@ class EditSegment(TemplateView):
             id_segment = request.POST['id'] 
             segment = Segment.objects.get(id=id_segment)
             if 'btn_save_segment' in request.POST:
-                form_segment = SegmentForm(request.POST, instance=segment) 
+                post = save_new_tags(request,segment.image)
+                form_segment = SegmentForm(post, instance=segment) 
                 if form_segment.is_valid():
                     form_segment.save()     
                 else:

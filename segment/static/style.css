@@ -8,6 +8,15 @@ div.square {
     background: none repeat scroll 0% 0% #FEFEFE;
 }
 
+div.square_login_image {
+    color: #555;
+    padding: 30px;
+    background: none repeat scroll 0% 0% #FEFEFE;
+    border: 1px solid #EEE;
+    box-shadow: 0px 0px 3px #EEE;
+    margin-top:15px;
+}
+
 div.square_login {
     color: #555;
     padding: 30px;

@@ -1,7 +1,41 @@
 {% extends "base.html" %}
 {% load widget_tweaks%}
 
-{% block header%}  
+{% block header%} 
+<script>
+    function add_tag(new_tag,alert_invalid) {
+        var tagpattern = new RegExp("^[A-Za-z0-9 ]+$");
+        if (!tagpattern.test(new_tag)) {
+            if (alert_invalid) {
+                alert("Invalid data in new tag field.");
+            }
+            return;
+        }
+        var tags = document.getElementById("id_tags");
+        var tagOption = new Option(new_tag, "new_tag_"+new_tag);
+        tags.appendChild(tagOption);
+        tagOption.selected=true;
+        document.getElementById('id_custom_tag').value = "";
+        refresh_input_tags();
+    }
+
+    function refresh_input_tags() {
+        var tags = document.getElementById("id_tags");
+        var input_tags = document.getElementById("id_input_tags");
+        var value = "";
+        var cont=0;
+        for (var i = 0; i < tags.length; i++) {
+             if (tags.options[i].selected) {
+                if (cont != 0) {
+                    value += ',';
+                }
+                value = value + tags.options[i].text;
+                cont++;
+            }
+        }
+        input_tags.value = value;
+    }
+</script> 
 
 {%endblock%}
 
@@ -31,7 +65,20 @@
                 </div>
             </div>
             <br/>
-
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="id_name">New tag</label>   
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <input class="form-control" id="id_custom_tag" value="" type="text"/>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-default" onclick="add_tag(document.getElementById('id_custom_tag').value,true);" title="Add"><span class="glyphicon glyphicon-plus"></span></button>
+                    </div>                    
+                </div>
+            </div>
+            <br/>
             <div class="row">
                 <div class="col-md-3">
                     <label for="id_tags">Tags</label>
