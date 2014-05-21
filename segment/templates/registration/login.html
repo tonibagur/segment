@@ -45,20 +45,53 @@
         <div class="carousel-caption jumbotron coneptum-jumbotron">
             <h2>Sometimes it's not who has the best algorithm that wins; <br/>it's who has the most data!</h2>
             <!--<p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>-->
-            <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+            <a href="#id_faqs" class="btn btn-primary btn-lg" onclick="document.getElementById('id_faqs').style.display='initial';">
             Learn more
-            </button>
+            </a>
         </div>
     </div>
 </div>
 
-<div class="col-md-10 col-md-offset-1">
-<hr>
-<div class="row">
-    <div class="right" style="color:#555555">
-        Contact/Feedback: <a href="mailto:honeyboxml@gmail.com" target="_top">honeyboxml@gmail.com</a>
+<div id="id_faqs" class="col-md-10 col-md-offset-1" style="display:none">
+<br/>
+    <h2> <font style="color:#357EBD">FAQ</font><font style="color:black">'S</font></h2>
+    <hr>
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 style="color:#357EBD">Why this name?</h4></div>
+      <div class="panel-body">
+        Honeybox.ml is a wordgame combining the term "honeypot project used by Andrew Ng in a video talking about what to do next in a ML project" and the bounding boxes that a user does to capture the segments :)
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 style="color:#357EBD">What is HoneyBox.ml?</h4></div>
+      <div class="panel-body">
+            We can segment images by rectangles and tag this segments with on or more tags. I think that this is applicable to a variety of problems such as object detection( I am using it for this), face detection, face recognition, pedestrian detection, etc... not only for text. I hope I will be able to release some instruccions on the following days. For now, just a brieve description of functionalities:
+                <br/><br/>
+                1) The system is organized in training sets composed by one or more images. Each image can have one or more segments which can be tagged with one or more tags. The tags used with every segment are shared with every segment and every image that belongs to the same training set.
+                <br/><br/>
+                2) Once a training set( a set of images composed by segments) is tagged, the user can download the training set in a variety of formats(color,grayscale,edge detection) all in matlab or zip format. The matlab files are organized as follows: 
+                <ul>
+                    <li>X is a matrix with a row for every image. </li>
+                    <li>labels is an ordered list of strings with the tag names corresponding to variable Y.</li>
+                    <li>A binary matrix where the ith row indicates whether the ith image of X is tagged with tag j or not.</li>
+                </ul>
+                The zip format is very simple: a folder for every tag wich contains the images tagged by this tag. 
+                3) Another interesting functionality allows you to generate a set of images for a second training set starting from a set of tags of a training set or image. The first applicability of this use case is for computer vision pipelines such as the described on the photo ocr videos but I think that could be useful on other problem domains.
+        <br/> 
+      </div>
     </div>
 </div>
+
+
+<!--footer for login -->
+<div class="col-md-10 col-md-offset-1">
+    <hr>
+    <div class="row">
+        <div class="right" style="color:#555555">
+            Contact/Feedback: <a href="mailto:honeyboxml@gmail.com" target="_top">honeyboxml@gmail.com</a>
+        </div>
+    </div>
+    <br/><br/><br/>
 </div>
 
 {% include "modal_login.html" %}

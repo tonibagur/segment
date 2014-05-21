@@ -433,10 +433,10 @@ def get_matlab_file(request):
             if color=='edges':
                 SimpleCV.Image(tmp_img).edges().save(tmp_img)
             images.append(tmp_img)
-        octave.put('y',numpy.array(y))
+        octave.put('y',numpy.array(y,dtype=float))
         octave.put('images',images)
         print images
-        octave.run('X=load_images(images);')
+        octave.run('X=double(load_images(images));')
         filemat='{0}/data.mat'.format(temp_folder)
         print "filemat",filemat
         if color=='color':
