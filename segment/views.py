@@ -44,7 +44,7 @@ class LImages(ListView):
     paginate_by = 50 #and that's it !!
     base_url= '/limages/'
     view_name = 'LImages'
-    header = 'Trainning set'
+    header = 'Training set'
 
     def get(self,request):
         self.id_image = ''
@@ -350,7 +350,7 @@ class EditSegment(TemplateView):
 
 class EditImageType(TemplateView):
     template_name='details_imagetype.html'
-    header = 'Edit Trainning set'
+    header = 'Edit Training set'
 
     def get(self,request):
         self.request = request
