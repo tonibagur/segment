@@ -61,6 +61,7 @@
 
                   {% endblock %}
                   <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/faqs/">FAQ's</a></li>
                     {% if user.is_authenticated %}
                         <li><a href="/accounts/logout/?next=/"> {{ user.username }} (Logout)</a></li>
                     {% else %}

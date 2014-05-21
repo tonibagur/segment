@@ -384,6 +384,17 @@ class EditImageType(TemplateView):
                 return HttpResponseRedirect('/limages/')  
         return HttpResponseRedirect('/edit_imagetype/?id='+str(id_imagetype)) 
 
+
+class Faqs(TemplateView):
+    template_name='faqs.html'
+    header = 'FAQs'
+
+    def get_context_data(self, **kwargs):
+        context = super(Faqs, self).get_context_data(**kwargs)
+        context['header'] = self.header
+        return context
+
+
 def get_matlab_file(request):
     if 'tags' in request.GET:
         image = ''
