@@ -1,0 +1,49 @@
+{% load widget_tweaks%}  
+<!-- Modal -->
+<div class="modal fade" id="myModal_Login" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h1 class="modal-title" id="myModalLabel"><font style="color:#357EBD">Honey</font><font style="color:black">Box</font> <small style="font-size:13px;">beta</small></a></h1>
+      </div>
+      <div class="modal-body">
+            {% if next %}
+                <form class="login" method="post" action="/accounts/login/?next={{next}}">
+            {%else%}
+                <form class="login" action="/accounts/login/" method="post" >
+            {%endif%}
+                {% csrf_token %}
+                {% if form.errors.username %}
+                    <div class="alert alert-danger alert-dismissable">
+                      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                      {{form.errors.username}}
+                    </div>
+                {% endif %}
+                <div {% if form.errors.username %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+                  <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+                  {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
+                </div>
+                <div>&nbsp;</div>
+                {% if form.errors.password %}
+                    <div class="alert alert-danger alert-dismissable">
+                      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                      {{form.errors.password}}
+                    </div>
+                {% endif %}
+                <div {% if form.errors.password %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
+                  <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+                  {{form.password | add_class:"form-control" | attr:"placeholder:Password"}}
+                </div>
+                <div>&nbsp;</div>
+                <div><input class="btn btn-primary btn-lg" type="submit" value="Login" id="id_btn_login" /></div>
+            </form>
+            <hr>
+            <a href="/register">Not registered yet?</a><br/>
+            <a href="/accounts/password/reset">Forget your Password?</a>
+            <hr>
+            Contact/Feedback: <a href="mailto:honeyboxml@gmail.com" target="_top">honeyboxml@gmail.com</a>
+      </div>
+    </div>
+  </div>
+</div>
