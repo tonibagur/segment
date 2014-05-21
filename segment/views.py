@@ -306,7 +306,7 @@ class EditImage(TemplateView):
             id_image = request.POST['id']
             image = Image.objects.get(id=id_image)
             if 'btn_save_image' in request.POST:
-                form_image = ImageForm(request.POST,request.FILES, instance=image) 
+                form_image = ImageForm(data=request.POST,files=request.FILES, instance=image,user=request.user) 
                 if form_image.is_valid():
                     form_image.save()       
             if 'btn_return' in request.POST:
