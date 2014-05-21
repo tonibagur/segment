@@ -22,7 +22,7 @@
                 {% endif %}
                 <div {% if form.errors.username %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
                   <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
-                  {{form.username | add_class:"form-control" | attr:"placeholder:Username"}}
+                  {{form.username | add_class:"form-control input-lg" | attr:"placeholder:Username" }}
                 </div>
                 <div>&nbsp;</div>
                 {% if form.errors.password %}
@@ -33,7 +33,7 @@
                 {% endif %}
                 <div {% if form.errors.password %}class="input-group margin-bottom-20 has-error"{%else%}class="input-group margin-bottom-20"{%endif%}>
                   <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-                  {{form.password | add_class:"form-control" | attr:"placeholder:Password"}}
+                  {{form.password | add_class:"form-control input-lg" | attr:"placeholder:Password"}}
                 </div>
                 <div>&nbsp;</div>
                 <div><input class="btn btn-primary btn-lg" type="submit" value="Login" id="id_btn_login" /></div>
