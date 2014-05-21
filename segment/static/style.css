@@ -40,4 +40,22 @@ table.table th {
     background-color: #E7E7E7; /*#E7E7E7;  #F8F8F8*/
 }
 
+.carousel-caption {
+    position: absolute;
+    left: 50%;
+    right: 5%;
+    top: 20px;
+    z-index: 10;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    color: #FFF;
+    text-align: center;
+    text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6);
+    max-height:300px;
+}
+
+.coneptum-jumbotron {
+/*color: inherit;*/
+background: rgba(0,0,0,0.6);
+}
 
