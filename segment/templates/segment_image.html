@@ -222,10 +222,13 @@
         {% endif %}
     {% endif %}
     <br/><br/>
+<!-- Image -->
     <div id="id_div_canvas">
         <canvas id="canvas" class="segmentation"></canvas>
     </div>
     <br/>
+
+<!--Tags-->
     {% if draw_segments and tags%}
         <div>&nbsp;</div>
         <div class="panel panel-default">
@@ -262,10 +265,13 @@
     <div>&nbsp;</div>
     <div>&nbsp;</div>
     <div>&nbsp;</div>
+
+
+<!--Segments-->
     {% if segments %}
         <h4>Segments</h4>
-        <br/>
-        
+        <label style="float:right;">Total segments: {{total_segments}}</label>
+        <div>&nbsp;</div>
         <div class="table-responsive">
             <table class="table">
                 <tr>
@@ -299,7 +305,7 @@
 
 </form>
 
-
+<!-- Modals -->
 {% include "modal_segment_image.html" with form_segment=form_segment zoom=zoom id_image=id_image %}
 
 {% include "modal_generate_images.html" with form_generate_images=form_generate_images zoom=zoom id_image=id_image%}

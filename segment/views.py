@@ -164,6 +164,7 @@ class SegmentImage(TemplateView):
         if self.id_image:
             context['id_image'] = self.id_image
             image = Image.objects.get(id=self.id_image)
+            context['total_segments'] = image.get_count_segments
             context['download_tags'] = Tag.objects.filter(image_type=image.image_type).order_by('name')
             context['form'] = ImageForm(instance=image,user=self.request.user)
             new_segment = Segment(image=image)
