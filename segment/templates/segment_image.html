@@ -114,13 +114,42 @@
                 {% if draw_segments %}
                     ctx.lineWidth="2";
                     ctx.strokeStyle="red";
-                    {% for tag,segments in tags.items %}
-                        {% for segment in segments %}
+                    var e = document.getElementById("id_select_tags");
+                    var option = e.options[e.selectedIndex].value;
+                    if (option == 'one_tag') {
+                        {% for tag,segments in tags.items %}
+                            {% for segment in segments %}
+                                if (document.getElementById("id_{{tag}}").checked == true) {
+                                    ctx.rect({{segment.x1}}, {{segment.y1}}, {{segment.x2}}-{{segment.x1}}, {{segment.y2}}-{{segment.y1}});
+                                }
+                            {%endfor%} 
+                        {% endfor %}
+                    }
+                    else if (option=='all_tags') {
+                        var selected_tags = new Array();
+                        {% for tag,segments in tags.items %}
                             if (document.getElementById("id_{{tag}}").checked == true) {
+                                selected_tags.push("{{tag}}");
+                            }
+                        {%endfor%}
+                        {% for segment in segments%}
+                            var all_tags = true;
+                            for (i=0; all_tags == true && i < selected_tags.length; i++) {
+                                trobat = false;
+                                {% for tag in segment.tags.all %}
+                                    if (selected_tags[i] == "{{tag.name}}"){
+                                        trobat = true;
+                                    }
+                                {% endfor %}
+                                if (trobat == false) {
+                                    all_tags = false;
+                                }
+                            }
+                            if (all_tags == true) {
                                 ctx.rect({{segment.x1}}, {{segment.y1}}, {{segment.x2}}-{{segment.x1}}, {{segment.y2}}-{{segment.y1}});
                             }
-                        {%endfor%} 
-                    {% endfor %}
+                        {% endfor %}
+                    }
                     ctx.stroke(); 
                 {% endif %}
             }
@@ -233,11 +262,22 @@
         <div>&nbsp;</div>
         <div class="panel panel-default">
           <div class="panel-heading">Tags
-                <div style="float:right;">
-                    <a id="id_link_select_all_draw" onclick="select_all_tags_draw();" style="margin-right:15px;">Deselect all</a>
-                </div>
+
+                    <div style="float:right;">
+                        <a id="id_link_select_all_draw" onclick="select_all_tags_draw();" style="margin-right:15px;">Deselect all</a>
+                    </div>
           </div>
           <div class="panel-body">
+            <div class="row">
+                <div class="col-md-3"> 
+                    <select class="form-control" id="id_select_tags" name="select_tags" onchange="init_canvas();">
+                        <option value="one_tag">Segments with at least one tag</option>
+                        <option value="all_tags">Segments with all tags</option>
+                    </select>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
             {% for tag, segments in tags.items%}
                 {% if segments %}
                     <div class="col-md-3">
@@ -249,6 +289,7 @@
                     </div>
                 {% endif%}
             {% endfor %}
+            </div>
           </div>
         </div>
     {% endif %}
@@ -282,7 +323,7 @@
                 </tr>
                 {%for segment in segments %}
                     <tr>
-                        <td><img class="media-object" src="/static/{{segment.filename}}" style="max-width:70px;max-height:50px;"/></td>
+                        <td><img class="media-object" src="/static/{{segment.filename}}" style="max-width:70px;max-height:50px;"/>{{segment.algorithm}}</td>
                         <td>{{segment.get_width}} x {{segment.get_height}} px</td>
                         <td>{% for tag in segment.tags.all %}{{tag}},{%endfor%}</td>
                         <td align="right">       

@@ -12,6 +12,14 @@
             return;
         }
         var tags = document.getElementById("id_tags");
+        for (i=0; i < tags.length; i++) {
+            if (tags.options[i].text == new_tag) {
+                if (alert_invalid) {
+                    alert("This tag already exists.");
+                }
+                return;
+            }
+        }
         var tagOption = new Option(new_tag, "new_tag_"+new_tag);
         tags.appendChild(tagOption);
         tagOption.selected=true;
