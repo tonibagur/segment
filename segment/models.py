@@ -42,6 +42,8 @@ class Segment(models.Model):
     image = models.ForeignKey('Image')                                                                                                                                                             
     tags = models.ManyToManyField(Tag,blank=True)
     filename = models.CharField(max_length=200,blank=True)
+    autogenerate = models.BooleanField(default=False)
+    algorithm = models.CharField(max_length=200,blank=True)
 
     def get_width(self):
         return int(self.x2-self.x1)
